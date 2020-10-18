@@ -1,5 +1,5 @@
 const jsonwebtoken = require('jsonwebtoken');
-const AdminModel = require('../models/AdminModel');
+const AdminCModel = require('../models/CreateAdminModel');
 
 module.exports = (role) => async (req, res, next) => {
   
@@ -11,7 +11,7 @@ module.exports = (role) => async (req, res, next) => {
         const verificar = jsonwebtoken.verify(token, process.env.JWT_SECRET);
         console.log('verificar user->', verificar.user.role);
 
-        const userLogin = await AdminModel.findOne({ _id: verificar.user.id, token: token });
+        const userLogin = await AdminCModel.findOne({ _id: verificar.user.id, token: token });
         console.log('userLogin ->',userLogin)
         if (!userLogin) {
             return res.status(401).json({ mensaje: 'Dentro: No Autorizado' })

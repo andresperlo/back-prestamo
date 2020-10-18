@@ -1,6 +1,7 @@
 const express = require('express');
 const { check } = require('express-validator')
 const router = express.Router();
+const authAdmin = require('../middleware/authAdmin');
 
 const Admin = require('../controllers/Admin')
 const CreateAdmin = require('../controllers/CreateAdmins')
@@ -31,24 +32,30 @@ router.post('/regadmin', [
     check('password', 'la contraseña debe tener un mínimo de 8 caracteres').isLength({ min: 8 })
 ], CreateAdmin.CreateAdmin)
 
-router.get('/allsalesadmin', Admin.getSalesFalseAdmin)
-router.get('/allsalesfalseadmin', Admin.getSalesFalseAdmin)
-router.get('/allselleradmin', Admin.getSellerAdmin)
-router.get('/allsellerfalseadmin', Admin.getSalesFalseAdmin)
-router.get('/oneseller', Admin.SearchOneSeller)
-router.get('/onesale/:id', Admin.SearchOneSale)
+router.post('/login', [
+    check('username', 'Ingresar un usuario Correcto').notEmpty(),
+    check('password', ' Campo Vacio. Contraseña').notEmpty(),
+    check('password', 'la contraseña debe tener un mínimo de 8 caracteres').isLength({ min: 8 })
+], CreateAdmin.loginAdmin)
 
-router.get('/salestoday', Admin.GetOneDate)
-router.get('/salesmonth', Admin.GetMonth)
-router.get('/salesyear', Admin.GetYear)
+router.get('/allsales',authAdmin('admin'), Admin.getSalesAdmin)
+router.get('/allsalesfalse',authAdmin('admin'), Admin.getSalesFalseAdmin)
+router.get('/allseller',authAdmin('admin'), Admin.getSellerAdmin)
+router.get('/allsellerfalse',authAdmin('admin'), Admin.getSellerAdmin)
+router.get('/oneseller',authAdmin('admin'), Admin.SearchOneSeller)
+router.get('/onesale/:id',authAdmin('admin'), Admin.SearchOneSale)
+
+router.get('/salestoday',authAdmin('admin'), Admin.GetOneDate)
+router.get('/salesmonth',authAdmin('admin'), Admin.GetMonth)
+router.get('/salesyear',authAdmin('admin'), Admin.GetYear)
 
 /* ventas */
-router.put('/salesupdate/:id', Admin.PutSales)
-router.put('/salesdisenable/:id', Admin.SalesDis)
-router.put('/salesenable/:id', Admin.SalesEn)
+router.put('/salesupdate/:id',authAdmin('admin'), Admin.PutSales)
+router.put('/salesdisenable/:id',authAdmin('admin'), Admin.SalesDis)
+router.put('/salesenable/:id',authAdmin('admin'), Admin.SalesEn)
 /* vendedores */
-router.put('/sellerupdate/:id', Admin.PutSeller)
-router.put('/sellerdisenable/:id', Admin.SellerDis)
-router.put('/sellerenable/:id', Admin.SellerEn)
+router.put('/sellerupdate/:id',authAdmin('admin'), Admin.PutSeller)
+router.put('/sellerdisenable/:id',authAdmin('admin'), Admin.SellerDis)
+router.put('/sellerenable/:id',authAdmin('admin'), Admin.SellerEn)
 
 module.exports = router;

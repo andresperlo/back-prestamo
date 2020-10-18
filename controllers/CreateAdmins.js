@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const bcryptjs = require('bcryptjs')
+const jsonwebtoken = require('jsonwebtoken')
+const { validationResult } = require('express-validator')
 const AdminCreateModel = require('../models/CreateAdminModel');
 
 exports.CreateAdmin = async (req, res) => {
@@ -37,5 +39,40 @@ exports.CreateAdmin = async (req, res) => {
         res.send({ mensaje: 'Tu Administrador se Registro Correctamente', admin })
     } catch (error) {
         res.status(500).send(error);
+    }
+}
+
+exports.loginAdmin = async (req, res) => {
+
+    const { body } = req
+
+    const userLogin = await AdminCreateModel.findOne({ username: body.username });
+    console.log('username->', body.username)
+    if (!userLogin) {
+        return res.status(400).json({ mensaje: 'Usuario y/o Contraseña Incorrectos' })
+    }
+
+    const passCheck = await bcryptjs.compare(body.password, userLogin.password);
+    if (!passCheck) {
+        return res.status(400).json({ mensaje: 'Usuario y/o Contraseña Incorrectos' })
+    }
+
+    const jwt_payload = {
+        user: {
+            id: userLogin.id,
+            username: userLogin.username,
+            role: userLogin.roleType
+        }
+    }
+
+    try { 
+        const token = jsonwebtoken.sign(jwt_payload, process.env.JWT_SECRET, { expiresIn: process.env.TIME_EXP })
+        console.log('token ->', token);
+        userLogin.token = [ token ] 
+        await AdminCreateModel.update({ username: userLogin.username }, userLogin)
+        console.log('userLogin->', userLogin.username);
+        res.send({ mensaje: 'Logueado Correctamente', token,  role: userLogin.roleType, id: userLogin._id })
+    } catch (error) {
+        return res.status(500).json({ mensaje: 'ERROR', error })
     }
 }

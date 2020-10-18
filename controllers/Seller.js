@@ -18,7 +18,7 @@ exports.loginseller = async (req, res) => {
 
     const { body } = req
 
-    const userLogin = await AdminModel.findOne({ usuarioVendedor: body.usuarioVendedor });
+    const userLogin = await AdminModel.findOne({ user: body.user });
     if (!userLogin) {
         return res.status(400).json({ mensaje: 'Usuario y/o Contraseña Incorrectos' })
 
@@ -32,7 +32,7 @@ exports.loginseller = async (req, res) => {
     const jwt_payload = {
         user: {
             id: userLogin.id,
-            usuarioVendedor: userLogin.usuarioVendedor,
+            user: userLogin.user,
             role: userLogin.roleType
         }
     }
@@ -40,7 +40,7 @@ exports.loginseller = async (req, res) => {
     try {
         const token = jsonwebtoken.sign(jwt_payload, process.env.JWT_SECRET, { expiresIn: process.env.TIME_EXP })
         userLogin.token = [ token ] 
-        await AdminModel.update({ usuarioVendedor: userLogin.usuarioVendedor }, userLogin)
+        await AdminModel.update({ user: userLogin.user }, userLogin)
         res.send({ mensaje: 'Logueado Correctamente', token,  role: userLogin.roleType, id: userLogin._id })
     } catch (error) {
         return res.status(500).json({ mensaje: 'ERROR', error })

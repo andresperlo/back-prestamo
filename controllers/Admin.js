@@ -43,7 +43,7 @@ exports.CreateSeller = async (req, res) => {
 }
 
 
-exports.getSalesFalseAdmin = async (req, res) => {
+exports.getSalesAdmin = async (req, res) => {
 
     try {
 
@@ -70,7 +70,7 @@ exports.getSellerAdmin = async (req, res) => {
 exports.SalesDis = async (req, res) => {
 
     try {        
-        const sales = await FormAdmin.findByIdAndUpdate(req.params.id, {enable:false}, { new: true })
+        const sales = await SellerModel.findByIdAndUpdate(req.params.id, {enable:false}, { new: true })
         res.send(sales)
     } catch (err) {
         res.status(500).send(err);
@@ -80,7 +80,7 @@ exports.SalesDis = async (req, res) => {
 exports.SalesEn = async (req, res) => {
 
     try {        
-        const sales = await FormAdmin.findByIdAndUpdate(req.params.id, {enable:true}, { new: true }).select('-_id -token -password -__v -user')
+        const sales = await SellerModel.findByIdAndUpdate(req.params.id, {enable:true}, { new: true }).select('-_id -token -password -__v -user')
         res.send(sales)
     } catch (err) {
         res.status(500).send(err);
@@ -91,6 +91,7 @@ exports.SellerDis = async (req, res) => {
 
     try {        
         const seller = await AdminModel.findByIdAndUpdate(req.params.id, {enable:false}, { new: true })
+        .select('-token -password -__v')
         res.send(seller)
     } catch (err) {
         res.status(500).send(err);
@@ -101,6 +102,7 @@ exports.SellerEn = async (req, res) => {
 
     try {        
         const seller = await AdminModel.findByIdAndUpdate(req.params.id, {enable:true}, { new: true })
+        .select('-token -password -__v')
         res.send(seller)
     } catch (err) {
         res.status(500).send(err);
@@ -188,7 +190,7 @@ exports.SearchOneSeller = async (req, res) => {
     try {
         const { body } = req
 
-        const seller = await SellerModel.find({ nombreVendedor: body.nombreVendedor }).select('-_id -roleType -token -__v');
+        const seller = await SellerModel.find({ fullname: body.fullname }).select('-_id -roleType -token -__v');
         if (!seller) {
             return res.status(400).json({ mensaje: 'No se encuentra al Vendedor en la base de datos' })
         }
@@ -202,7 +204,7 @@ exports.SearchOneSale = async (req, res) => {
     try {
 
         const sale = await SellerModel.findById(req.params.id)
-        .populate('seller', '-_id nombreVendedor')
+        .populate('seller', '-_id fullname')
         .select('-_id -roleType -token -__v -month -year');
         if (!sale) {
             return res.status(400).json({ mensaje: 'No se encuentra al Vendedor en la base de datos' })
@@ -237,6 +239,7 @@ exports.PutSeller = async (req, res) => {
         }
         
         const seller = await AdminModel.findByIdAndUpdate(req.params.id, req.body, { new: true })
+        .select('-token -password -__v -_id -roleType -enable')
         res.send(seller)
     } catch (err) {
         res.status(500).send(err);
