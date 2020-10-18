@@ -41,7 +41,7 @@ exports.CreateSeller = async (req, res) => {
         res.status(500).send(error);
     }
 }
-
+ 
 
 exports.getSalesAdmin = async (req, res) => {
 
@@ -210,6 +210,20 @@ exports.SearchOneSale = async (req, res) => {
             return res.status(400).json({ mensaje: 'No se encuentra al Vendedor en la base de datos' })
         }
         res.send(sale)
+    } catch (err) {
+        res.status(500).send(err);
+    }
+}
+
+exports.GetUserDni = async (req, res) => {
+    try {
+        const { body } = req
+
+        const user = await SellerModel.findOne({ dniClient: body.dniClient }).select('-_id -roleType -token -__v');
+        if (!user) {
+            return res.status(400).json({ mensaje: 'No se encuentra el DNI en la base de datos' })
+        }
+        res.send(user)
     } catch (err) {
         res.status(500).send(err);
     }
