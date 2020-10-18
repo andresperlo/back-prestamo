@@ -1,66 +1,66 @@
 const mongoose = require('mongoose')
 
-const FormSchema = new mongoose.Schema({
+const SellerSchema = new mongoose.Schema({
     
-    nombreVendedor:{
+    sellerName:{
         type: String,
         trim: true,
         required:true  
     },
-    lineaCredito:{
+    creditLine:{
         type: String,
         trim: true,
         required:true  
     },
-    tipOperacion: {
+    typeOperation: {
         type: String,
         trim: true,
         required:true  
     },
-    clienteNuevo:{
+    newClient:{
         type: Boolean,
         trim: true,
         required:true  
     },
-    nombreCliente:{
+    nameClient:{
         type: String,
         trim: true,
         required:true  
     },
-    dniCliente:{
+    dniClient:{
         type: Number,
         trim: true,
         unique: true,
         required:true  
     },
-    celularCliente: {
+    celphoneClient: {
         type: Number,
         required: true,
         trim: true,
     },
-    montoAprobado:{
+    amountApproved:{
         type: Number,
         required: true,
         trim: true
     },
-    cantidadCuota:{
+    quotaAmount:{
         type: Number,
         required: true,
         trim: true
     },
-    montoCuota:{
+    feeAmount:{
         type: Number,
         required: true,
         trim: true
     },
-    detalleVenta:{
+    saleDetail:{
         type: String,
         required: true,
         trim: true
     },
     seller: { 
         type: mongoose.Schema.Types.ObjectId,
-        ref:'vendedor'
+        ref:'seller'
     },
     date: {
         type: String
@@ -70,9 +70,14 @@ const FormSchema = new mongoose.Schema({
     },
     year: {
         type: String
+    },
+    enable:{
+        type: Boolean,
+        required:true,
+        default: true
     }
 })
  
-const FormModel = mongoose.model('formulario', FormSchema)
+const SellerModel = mongoose.model('sales', SellerSchema)
 
-module.exports = FormModel;
+module.exports = SellerModel;

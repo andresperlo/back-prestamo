@@ -3,44 +3,37 @@ const { check } = require('express-validator')
 const router = express.Router();
 const auth = require('../middleware/auth');
 
-const VendedorForm = require('../controllers/CreateForm')
-const CheckClient = require('../controllers/CheckClient')
-const LoginSeller = require('../controllers/LoginVendedor')
-const LogoutSeller = require('../controllers/LogoutSeller');
-const GetAllSales = require('../controllers/AllSales');
-const GetOneDate = require('../controllers/GetOneDate');
-const GetOneMonth = require('../controllers/GetOneMonth');
-const GetOneYear = require('../controllers/GetOneYear');
+const Seller = require('../controllers/Seller')
 
-router.post('/formseller', auth('vendedor'), [
-    check('nombreVendedor', 'Campo Nombre del Vendedor Vacio').notEmpty(),
-    check('lineaCredito', 'Campo lineaCredito Vació').notEmpty(),
-    check('tipOperacion', 'Ingresar un tipOperacion Correcto').notEmpty(),
-    check('clienteNuevo', 'Campo clienteNuevo Vacio').notEmpty(),
-    check('nombreCliente', 'Campo nombreCliente Vacio').notEmpty(),
-    check('dniCliente', 'Campo dniCliente Vacio').notEmpty(),
-    check('celularCliente', 'Ingresar un celularCliente Correcto').notEmpty(),
-    check('montoAprobado', 'Campo Vacio. montoAprobado').notEmpty(),
-    check('cantidadCuota', ' Campo Vacio. cantidadCuota').notEmpty(),
-    check('montoCuota', ' Campo Vacio. montoCuota').notEmpty(),
-    check('detalleVenta', ' Campo Vacio. detalleVenta').notEmpty(),
-], VendedorForm.AltaForm)
+router.post('/formseller', auth('seller'), [
+    check('sellername', 'Campo Nombre del Vendedor Vacio').notEmpty(),
+    check('creditLine', 'Campo lineaCredito Vació').notEmpty(),
+    check('typeOperation', 'Ingresar un tipOperacion Correcto').notEmpty(),
+    check('newClient', 'Campo clienteNuevo Vacio').notEmpty(),
+    check('nameClient', 'Campo nombreCliente Vacio').notEmpty(),
+    check('dniClient', 'Campo dniCliente Vacio').notEmpty(),
+    check('celphoneClient', 'Ingresar un celularCliente Correcto').notEmpty(),
+    check('amountApproved', 'Campo Vacio. montoAprobado').notEmpty(),
+    check('quotaAmount', ' Campo Vacio. cantidadCuota').notEmpty(),
+    check('feeAmount', ' Campo Vacio. montoCuota').notEmpty(),
+    check('saleDetail', ' Campo Vacio. detalleVenta').notEmpty(),
+], Seller.AltaForm)
 
 router.post('/login', [
-    check('usuarioVendedor', 'Ingresar un celularCliente Correcto').notEmpty(),
+    check('user', 'Ingresar un usuario Correcto').notEmpty(),
     check('password', ' Campo Vacio. Contraseña').notEmpty(),
     check('password', 'la contraseña debe tener un mínimo de 8 caracteres').isLength({ min: 8 })
-], LoginSeller.loginseller)
+], Seller.loginseller)
 
-router.get('/checkdni', auth('vendedor'), [
+router.get('/checkdni', auth('seller'), [
     check('dniCliente', 'Campo dniCliente Vacio').notEmpty(),
-], CheckClient.GetUser)
+], Seller.GetUser)
 
-router.get('/onedate', auth('vendedor'), GetOneDate.GetOneDate)
-router.get('/onemonth', auth('vendedor'), GetOneMonth.GetMonth)
-router.get('/oneyear', auth('vendedor'), GetOneYear.GetYear)
+router.get('/onedate', auth('seller'), Seller.GetOneDate)
+router.get('/onemonth', auth('seller'), Seller.GetMonth)
+router.get('/oneyear', auth('seller'), Seller.GetYear)
 
-router.get('/logout', auth('vendedor'), LogoutSeller.LogoutSeller)
-router.get('/allsales', auth('vendedor'), GetAllSales.getSales)
+router.get('/allsales', auth('seller'), Seller.getSales)
+router.get('/logout', auth('seller'), Seller.LogoutSeller)
 
 module.exports = router;

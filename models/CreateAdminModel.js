@@ -29,7 +29,7 @@ const AdminSchema = new mongoose.Schema({
         required:true,
         unique: true
     },
-    user:{
+    username:{
         type: String,
         trim: true,
         required:true,
@@ -42,7 +42,7 @@ const AdminSchema = new mongoose.Schema({
     },
     roleType:{
         type: String,
-        default: 'seller',
+        default: 'admin',
         required:true  
     },
     enable:{
@@ -53,6 +53,6 @@ const AdminSchema = new mongoose.Schema({
     token: [String]
 })
  
-const AdminModel = mongoose.model('seller', AdminSchema)
+const AdminModel = mongoose.model('Administradores', AdminSchema)
 
 module.exports = AdminModel;
