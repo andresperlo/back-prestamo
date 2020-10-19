@@ -19,12 +19,6 @@ router.post('/formseller', auth('seller'), [
     check('saleDetail', ' Campo Vacio. detalleVenta').notEmpty(),
 ], Seller.AltaForm)
 
-router.post('/login', [
-    check('user', 'Ingresar un usuario Correcto').notEmpty(),
-    check('password', ' Campo Vacio. Contraseña').notEmpty(),
-    check('password', 'la contraseña debe tener un mínimo de 8 caracteres').isLength({ min: 8 })
-], Seller.loginseller)
-
 router.get('/checkdni', auth('seller'), [
     check('dniCliente', 'Campo dniCliente Vacio').notEmpty(),
 ], Seller.GetUser)

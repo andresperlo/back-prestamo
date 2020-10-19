@@ -3,6 +3,45 @@ const bcryptjs = require('bcryptjs')
 const moment = require('moment')
 const SellerModel = require('../models/SellerModel');
 const AdminModel = require('../models/AdminModel');
+const AdminCreateModel = require('../models/CreateAdminModel');
+
+exports.CreateAdmin = async (req, res) => {
+    
+    const {fullname, dni, address, celphone, email, username, password} = req.body
+
+    let userExists = await AdminCreateModel.findOne({ dni });
+    if (userExists) {
+        return res.status(400).json({ mensaje: 'El Administrador ya existe' })
+    }
+
+    let mailExists = await AdminCreateModel.findOne({ email });
+    if (mailExists) {
+        console.log(mailExists)
+        return res.status(400).json({ mensaje: 'El Administrador ya existe' })
+    }
+
+    const admin = {
+        fullname,
+        dni,
+        address,
+        celphone,
+        email,
+        username,
+        tokens: []
+    };
+
+    const salt = await bcryptjs.genSalt(10);
+    admin.password = await bcryptjs.hash(password, salt);
+
+    const usuario = new AdminCreateModel(admin);
+   
+    try {
+        await usuario.save(); 
+        res.send({ mensaje: 'Tu Administrador se Registro Correctamente', admin })
+    } catch (error) {
+        res.status(500).send(error);
+    }
+}
 
 exports.CreateSeller = async (req, res) => {
     
@@ -41,7 +80,6 @@ exports.CreateSeller = async (req, res) => {
         res.status(500).send(error);
     }
 }
- 
 
 exports.getSalesAdmin = async (req, res) => {
 
@@ -259,3 +297,14 @@ exports.PutSeller = async (req, res) => {
         res.status(500).send(err);
     }
 }
+
+
+exports.LogoutAdmin = async (req, res) => {
+    try {
+
+       await AdminCreateModel.updateOne({ _id: res.locals.user.id }, { $set: { token: [] } })
+       res.json({ mensaje: 'Deslogueo ok' })
+   } catch (error) {
+       res.status(500).send({ mensaje: 'Error', error })
+   }
+} 

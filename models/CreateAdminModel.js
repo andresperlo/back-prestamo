@@ -29,7 +29,7 @@ const AdminSchema = new mongoose.Schema({
         required:true,
         unique: true
     },
-    username:{
+    user:{
         type: String,
         trim: true,
         required:true,

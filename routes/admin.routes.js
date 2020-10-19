@@ -4,13 +4,6 @@ const router = express.Router();
 const authAdmin = require('../middleware/authAdmin');
 
 const Admin = require('../controllers/Admin')
-const CreateAdmin = require('../controllers/CreateAdmins')
-
-router.post('/login', [
-    check('username', 'Ingresar un usuario Correcto').notEmpty(),
-    check('password', ' Campo Vacio. Contraseña').notEmpty(),
-    check('password', 'la contraseña debe tener un mínimo de 8 caracteres').isLength({ min: 8 })
-], CreateAdmin.loginAdmin)
 
 router.post('/regseller', [
     check('fullname', 'Campo Nombre del Vendedor Vacio').notEmpty(),
@@ -36,7 +29,7 @@ router.post('/regadmin', [
     check('username', 'Ingresar un usuario Correcto').notEmpty(),
     check('password', ' Campo Vacio. Contraseña').notEmpty(),
     check('password', 'la contraseña debe tener un mínimo de 8 caracteres').isLength({ min: 8 })
-],authAdmin('admin'), CreateAdmin.CreateAdmin)
+],authAdmin('admin'), Admin.CreateAdmin)
 
 router.get('/allsales',authAdmin('admin'), Admin.getSalesAdmin)
 router.get('/allsalesfalse',authAdmin('admin'), Admin.getSalesFalseAdmin)
@@ -60,6 +53,6 @@ router.put('/sellerupdate/:id',authAdmin('admin'), Admin.PutSeller)
 router.put('/sellerdisenable/:id',authAdmin('admin'), Admin.SellerDis)
 router.put('/sellerenable/:id',authAdmin('admin'), Admin.SellerEn)
 
-router.get('/logout',authAdmin('admin'), CreateAdmin.LogoutAdmin)
+router.get('/logout',authAdmin('admin'), Admin.LogoutAdmin)
 
 module.exports = router;
