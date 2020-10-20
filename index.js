@@ -5,7 +5,10 @@ const morgan = require('morgan')
 app.use(morgan('dev'))
 const cors = require('cors')
 app.use(cors())
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'))
 app.use(express.json())
+
 require('./dataBase')
 
 /* const port = process.env.PORT */
