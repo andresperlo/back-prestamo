@@ -68,7 +68,6 @@ exports.AltaForm = async (req, res) => {
     }
 }
 
-
 exports.getAllSales = async (req, res) => {
 
     try {
@@ -82,7 +81,7 @@ exports.getAllSales = async (req, res) => {
             return sale
         })
 
-        res.json({ allSales })
+        res.send({ allSales })
 
     } catch (err) {
         console.log('err', err)
@@ -105,7 +104,7 @@ exports.GetUserDni = async (req, res) => {
         if (!client) {
             return res.status(400).json({ mensaje: 'No se encuentra el DNI en la base de datos' })
         }
-        res.json({client})
+        res.send(client)
     } catch (err) {
         console.log(err)
         res.status(500).send(err);
@@ -118,7 +117,6 @@ exports.GetOneDate = async (req, res) => {
 
         const getSales = await SellerModel.find({ seller: res.locals.user.id });
 
-
         let GetDate = getSales.filter(getDate => {
             const date = moment((parseInt(getDate.date))).format('DD-MM-YYYY')
             console.log('date->', date, 'body.date ->', body.date);
@@ -129,7 +127,6 @@ exports.GetOneDate = async (req, res) => {
             oneDate.date = moment((parseInt(oneDate.date))).format('DD-MM-YYYY')
             return oneDate
         })
-
 
 
         if (!getSales.length) {
