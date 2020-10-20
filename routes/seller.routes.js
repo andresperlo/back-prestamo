@@ -21,8 +21,8 @@ router.post('/formseller',upload.single('myFile'), [
 ], auth('seller'), Seller.AltaForm)
 
 router.get('/checkdni', auth('seller'), [
-    check('dniCliente', 'Campo dniCliente Vacio').notEmpty(),
-], Seller.GetUser)
+    check('dniClient', 'Campo dniCliente Vacio').notEmpty(),
+], Seller.GetUserDni)
 
 router.get('/onedate', auth('seller'), Seller.GetOneDate)
 router.get('/onemonth', auth('seller'), Seller.GetMonth)

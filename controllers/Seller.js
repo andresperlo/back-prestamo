@@ -11,6 +11,7 @@ const AdminModel = require('../models/AdminModel');
 const sendNodeMail = require('../middleware/nodemailer');
 
 exports.AltaForm = async (req, res) => {
+    console.log('reqFile ->', req.file)
     const { creditLine, typeOperation, newClient, nameClient, dniClient, celphoneClient,
         amountApproved, quotaAmount, feeAmount, saleDetail } = req.body
 
@@ -43,7 +44,10 @@ exports.AltaForm = async (req, res) => {
         tokens: []
     };
 
+    console.log('user ->', user.file);
+
     const usuario = new SellerModel(user);
+    console.log('usuario ->', usuario)
 
     const SendPdf = {
         subject: 'Nueva Venta',
@@ -54,12 +58,11 @@ exports.AltaForm = async (req, res) => {
 
     try {
 
-        await usuario.save();
+        /*  await usuario.save();  */
         await sendNodeMail(SendPdf.subject, SendPdf.msg, SendPdf.file, SendPdf.email)
-
         fs.unlink(path.join(__dirname, '..', file.path), err =>
-        console.log('err', err))
-        res.send({ mensaje: 'Tu Usuario se Registro Correctamente', user })
+            console.log('err', err))
+        res.send({ mensaje: 'Venta Cargada Correctamente', user })
     } catch (error) {
         res.status(500).send(error);
     }
@@ -73,30 +76,38 @@ exports.getAllSales = async (req, res) => {
         let allSales = await SellerModel.find({ seller: res.locals.user.id })
         .populate('seller', 'fullname -_id')
         .select('-_id -sellerName')
+
         allSales = allSales.map(sale => {
-            sale.date = moment((parseInt(sale.date))).format('YYYY-MM-DD')
+            sale.date = moment((parseInt(sale.date))).format('DD-MM-YYYY')
             return sale
         })
 
         res.json({ allSales })
 
     } catch (err) {
+        console.log('err', err)
         res.status(500).send(err);
+
     }
 }
 
-exports.GetUser = async (req, res) => {
+exports.GetUserDni = async (req, res) => {
     try {
         const { body } = req
 
-        const user = await SellerModel.findOne({ dniClient: body.dniClient })
+        let client = await SellerModel.findOne({ dniClient: body.dniClient })
+            .populate('seller', 'fullname -_id')
             .select('-_id -roleType -token -__v');
 
-        if (!user) {
+            client.date = moment((parseInt(client.date))).format('DD-MM-YYYY')
+        
+
+        if (!client) {
             return res.status(400).json({ mensaje: 'No se encuentra el DNI en la base de datos' })
         }
-        res.send(user)
+        res.json({client})
     } catch (err) {
+        console.log(err)
         res.status(500).send(err);
     }
 }
@@ -108,10 +119,18 @@ exports.GetOneDate = async (req, res) => {
         const getSales = await SellerModel.find({ seller: res.locals.user.id });
 
 
-        const GetDate = getSales.filter(getDate => {
-            const date = moment((parseInt(getDate.date))).format('YYYY-MM-DD')
+        let GetDate = getSales.filter(getDate => {
+            const date = moment((parseInt(getDate.date))).format('DD-MM-YYYY')
+            console.log('date->', date, 'body.date ->', body.date);
             return date == body.date
         })
+
+        GetDate = GetDate.map(oneDate => {
+            oneDate.date = moment((parseInt(oneDate.date))).format('DD-MM-YYYY')
+            return oneDate
+        })
+
+
 
         if (!getSales.length) {
             return res.status(400).json({ mensaje: 'No se encuentra la fecha en la base de datos' })
@@ -132,6 +151,7 @@ exports.GetMonth = async (req, res) => {
 
         const GetMonth = month.filter(getMonth => {
             const Gmonth = moment(getMonth.Month).format('MMMM')
+            console.log('Month->', Gmonth, 'body.Month ->', body.month);
             return Gmonth == body.month
         })
 
@@ -153,6 +173,7 @@ exports.GetYear = async (req, res) => {
 
         const GetYear = year.filter(getYear => {
             const Gyear = moment(getYear.year).format('YYYY')
+            console.log('year->', Gyear, 'body.year ->', body.year);
             return Gyear == body.year
         })
 

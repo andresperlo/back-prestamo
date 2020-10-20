@@ -83,8 +83,14 @@ exports.getSalesAdmin = async (req, res) => {
 
     try {
 
-        const allSales = await SellerModel.find({enable: true}).select('-_id -__v')
+        let allSales = await SellerModel.find({enable: true}).select('-_id -__v')
         
+        allSales = allSales.map(sales => {
+            sales.date = moment((parseInt(sales.date))).format('DD-MM-YYYY')
+            return sales
+        })
+
+
         res.send(allSales)
     } catch (err) {
         res.status(500).send(err);
@@ -106,7 +112,10 @@ exports.getSellerAdmin = async (req, res) => {
 exports.SalesDis = async (req, res) => {
 
     try {        
-        const sales = await SellerModel.findByIdAndUpdate(req.params.id, {enable:false}, { new: true })
+        let sales = await SellerModel.findByIdAndUpdate(req.params.id, {enable:false}, { new: true })
+       
+        sales.date = moment((parseInt(sales.date))).format('DD-MM-YYYY')
+       
         res.send(sales)
     } catch (err) {
         res.status(500).send(err);
@@ -116,7 +125,10 @@ exports.SalesDis = async (req, res) => {
 exports.SalesEn = async (req, res) => {
 
     try {        
-        const sales = await SellerModel.findByIdAndUpdate(req.params.id, {enable:true}, { new: true }).select('-_id -token -password -__v -user')
+        let sales = await SellerModel.findByIdAndUpdate(req.params.id, {enable:true}, { new: true }).select('-_id -token -password -__v -user')
+       
+        sales.date = moment((parseInt(sales.date))).format('DD-MM-YYYY')
+       
         res.send(sales)
     } catch (err) {
         res.status(500).send(err);
@@ -149,9 +161,13 @@ exports.getSalesFalseAdmin = async (req, res) => {
 
     try {
 
-        const sales = await SellerModel.find({enable: false}).select('-_id -__v')
-        
-        res.send(sales)
+        let allSalesFalse = await SellerModel.find({enable: false}).select('-_id -__v')
+
+        allSalesFalse = allSalesFalse.map(sales => {
+            sales.date = moment((parseInt(sales.date))).format('DD-MM-YYYY')
+            return sales
+        })
+        res.send(allSalesFalse)
     } catch (err) {
         res.status(500).send(err);
     }
@@ -175,10 +191,18 @@ exports.GetOneDate = async (req, res) => {
         
         const getSales = await SellerModel.find({});
 
-        const GetDate = getSales.filter(getDate => {
-            const date = moment(parseInt(getDate.date)).format('YYYY-MM-DD')
+        let GetDate = getSales.filter(getDate => {
+            const date = moment((parseInt(getDate.date))).format('DD-MM-YYYY')
+            console.log('date->', date, 'body.date ->', body.date);
             return date == body.date
         })
+
+        GetDate = GetDate.map(oneDate => {
+            oneDate.date = moment((parseInt(oneDate.date))).format('DD-MM-YYYY')
+            return oneDate
+        })
+
+
 
         if (!getSales.length) {
             return res.status(400).json({ mensaje: 'No se encuentra la fecha en la base de datos' })
@@ -237,9 +261,14 @@ exports.SearchOneSeller = async (req, res) => {
 exports.SearchOneSale = async (req, res) => {
     try {
 
-        const sale = await SellerModel.findById(req.params.id)
+        let sale = await SellerModel.findById(req.params.id)
         .populate('seller', '-_id fullname')
         .select('-_id -roleType -token -__v -month -year');
+
+
+        sale.date = moment((parseInt(sale.date))).format('DD-MM-YYYY')
+
+
         if (!sale) {
             return res.status(400).json({ mensaje: 'No se encuentra al Vendedor en la base de datos' })
         }
@@ -253,7 +282,10 @@ exports.GetUserDni = async (req, res) => {
     try {
         const { body } = req
 
-        const user = await SellerModel.findOne({ dniClient: body.dniClient }).select('-_id -roleType -token -__v');
+        let user = await SellerModel.findOne({ dniClient: body.dniClient }).select('-_id -roleType -token -__v');
+       
+        user.date = moment((parseInt(user.date))).format('DD-MM-YYYY')
+
         if (!user) {
             return res.status(400).json({ mensaje: 'No se encuentra el DNI en la base de datos' })
         }
@@ -271,7 +303,10 @@ exports.PutSales = async (req, res) => {
             return res.status(400).json({mensaje: 'No hay resultado para la Busqueda'});
         }
         
-        const sales = await SellerModel.findByIdAndUpdate(req.params.id, req.body, { new: true })
+        let sales = await SellerModel.findByIdAndUpdate(req.params.id, req.body, { new: true })
+       
+        sales.date = moment((parseInt(sales.date))).format('DD-MM-YYYY')
+       
         res.send(sales)
     } catch (err) {
         res.status(500).send(err);
