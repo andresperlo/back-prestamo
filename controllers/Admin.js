@@ -16,7 +16,6 @@ exports.CreateAdmin = async (req, res) => {
 
     let mailExists = await AdminCreateModel.findOne({ email });
     if (mailExists) {
-        console.log(mailExists)
         return res.status(400).json({ mensaje: 'El Administrador ya existe' })
     }
 
@@ -54,7 +53,6 @@ exports.CreateSeller = async (req, res) => {
 
     let mailExists = await AdminModel.findOne({ email });
     if (mailExists) {
-        console.log(mailExists)
         return res.status(400).json({ mensaje: 'El Usuario ya existe' })
     }
 
@@ -176,11 +174,9 @@ exports.GetOneDate = async (req, res) => {
         const { body } = req
         
         const getSales = await SellerModel.find({});
-        console.log('getSales', getSales);
+
         const GetDate = getSales.filter(getDate => {
-            console.log('getDAte ->', getDate);
             const date = moment(parseInt(getDate.date)).format('YYYY-MM-DD')
-            console.log('date->', date, 'body.date ->', body.date);
             return date == body.date
         })
 

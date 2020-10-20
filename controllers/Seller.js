@@ -11,7 +11,6 @@ const AdminModel = require('../models/AdminModel');
 const sendNodeMail = require('../middleware/nodemailer');
 
 exports.AltaForm = async (req, res) => {
-    console.log('reqFile ->', req.file)
     const { creditLine, typeOperation, newClient, nameClient, dniClient, celphoneClient,
         amountApproved, quotaAmount, feeAmount, saleDetail } = req.body
 
@@ -20,7 +19,6 @@ exports.AltaForm = async (req, res) => {
 
     const email = res.locals.user.email
 
-    console.log('sellerEmail ->', res.locals.user.email)
     let userExists = await SellerModel.findOne({ dniClient });
     if (userExists) {
         return res.status(400).json({ mensaje: 'El Usuario ya existe' })
@@ -45,10 +43,7 @@ exports.AltaForm = async (req, res) => {
         tokens: []
     };
 
-    console.log('user ->', user.file);
-
     const usuario = new SellerModel(user);
-    console.log('usuario ->', usuario)
 
     const SendPdf = {
         subject: 'Nueva Venta',
@@ -57,16 +52,13 @@ exports.AltaForm = async (req, res) => {
         email: email
     }
 
-    console.log('SendPdf ->', SendPdf);
-
     try {
 
-        /*  await usuario.save();  */
+        await usuario.save();
         await sendNodeMail(SendPdf.subject, SendPdf.msg, SendPdf.file, SendPdf.email)
-        console.log('dirname ->', __dirname)
+
         fs.unlink(path.join(__dirname, '..', file.path), err =>
-            console.log('err', err))
-        console.log('sendNomailer ->', sendNodeMail);
+        console.log('err', err))
         res.send({ mensaje: 'Tu Usuario se Registro Correctamente', user })
     } catch (error) {
         res.status(500).send(error);
@@ -79,7 +71,8 @@ exports.getAllSales = async (req, res) => {
     try {
 
         let allSales = await SellerModel.find({ seller: res.locals.user.id })
-
+        .populate('seller', 'fullname -_id')
+        .select('-_id -sellerName')
         allSales = allSales.map(sale => {
             sale.date = moment((parseInt(sale.date))).format('YYYY-MM-DD')
             return sale
@@ -88,9 +81,7 @@ exports.getAllSales = async (req, res) => {
         res.json({ allSales })
 
     } catch (err) {
-        console.log('err', err)
         res.status(500).send(err);
-
     }
 }
 
@@ -119,7 +110,6 @@ exports.GetOneDate = async (req, res) => {
 
         const GetDate = getSales.filter(getDate => {
             const date = moment((parseInt(getDate.date))).format('YYYY-MM-DD')
-            console.log('date->', date, 'body.date ->', body.date);
             return date == body.date
         })
 
@@ -142,7 +132,6 @@ exports.GetMonth = async (req, res) => {
 
         const GetMonth = month.filter(getMonth => {
             const Gmonth = moment(getMonth.Month).format('MMMM')
-            console.log('Month->', Gmonth, 'body.Month ->', body.month);
             return Gmonth == body.month
         })
 
@@ -164,7 +153,6 @@ exports.GetYear = async (req, res) => {
 
         const GetYear = year.filter(getYear => {
             const Gyear = moment(getYear.year).format('YYYY')
-            console.log('year->', Gyear, 'body.year ->', body.year);
             return Gyear == body.year
         })
 

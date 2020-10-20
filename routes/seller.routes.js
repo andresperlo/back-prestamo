@@ -6,7 +6,6 @@ const auth = require('../middleware/auth');
 
 
 const Seller = require('../controllers/Seller')
-console.log('uploadRoutes ->', upload)
 router.post('/formseller',upload.single('myFile'), [
     check('sellername', 'Campo Nombre del Vendedor Vacio').notEmpty(),
     check('creditLine', 'Campo lineaCredito Vació').notEmpty(),

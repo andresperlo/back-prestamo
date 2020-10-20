@@ -4,15 +4,11 @@ const AdminModel = require('../models/AdminModel');
 module.exports = (role) => async (req, res, next) => {
   
     try {
-        console.log('role->', role);
-        console.log('role->', typeof role);
-        const token = req.header('Authorization').replace('Bearer ', '');
-        
-        const verificar = jsonwebtoken.verify(token, process.env.JWT_SECRET);
-        console.log('verificar user->', verificar.user.role);
 
+        const token = req.header('Authorization').replace('Bearer ', '');
+        const verificar = jsonwebtoken.verify(token, process.env.JWT_SECRET);
         const userLogin = await AdminModel.findOne({ _id: verificar.user.id, token: token });
-        console.log('userLogin ->',userLogin)
+       
         if (!userLogin) {
             return res.status(401).json({ mensaje: 'Dentro: No Autorizado' })
         }
@@ -25,7 +21,6 @@ module.exports = (role) => async (req, res, next) => {
 
         res.locals.user = userLogin;
         res.locals.token = token;
-       console.log('dentro de auth ->',userLogin);
         next();
     }
 
