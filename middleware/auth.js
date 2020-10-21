@@ -4,7 +4,7 @@ const AdminModel = require('../models/AdminModel');
 module.exports = (role) => async (req, res, next) => {
   
     try {
-
+        console.log('entra en seller')
         const token = req.header('Authorization').replace('Bearer ', '');
         const verificar = jsonwebtoken.verify(token, process.env.JWT_SECRET);
         const userLogin = await AdminModel.findOne({ _id: verificar.user.id, token: token });

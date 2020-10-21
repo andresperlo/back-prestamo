@@ -328,14 +328,3 @@ exports.PutSeller = async (req, res) => {
         res.status(500).send(err);
     }
 }
-
-
-exports.LogoutAdmin = async (req, res) => {
-    try {
-
-       await AdminCreateModel.updateOne({ _id: res.locals.user.id }, { $set: { token: [] } })
-       res.json({ mensaje: 'Deslogueo ok' })
-   } catch (error) {
-       res.status(500).send({ mensaje: 'Error', error })
-   }
-} 

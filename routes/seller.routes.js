@@ -29,6 +29,5 @@ router.get('/onemonth', auth('seller'), Seller.GetMonth)
 router.get('/oneyear', auth('seller'), Seller.GetYear)
 
 router.get('/allsales', auth('seller'), Seller.getAllSales)
-router.get('/logout', auth('seller'), Seller.LogoutSeller)
 
 module.exports = router;
