@@ -81,7 +81,7 @@ exports.getAllSales = async (req, res) => {
             return sale
         })
 
-        res.send({ allSales })
+        res.send( allSales )
 
     } catch (err) {
         console.log('err', err)
@@ -94,11 +94,11 @@ exports.GetUserDni = async (req, res) => {
     try {
         const { body } = req
 
-        let client = await SellerModel.findOne({ dniClient: body.dniClient })
+        const client = await SellerModel.findOne({ dniClient: body.dniClient })
             .populate('seller', 'fullname -_id')
             .select('-_id -roleType -token -__v');
 
-            client.date = moment((parseInt(client.date))).format('DD-MM-YYYY')
+          /*   client.date = moment((parseInt(client.date))).format('DD-MM-YYYY') */
         
 
         if (!client) {
@@ -107,6 +107,7 @@ exports.GetUserDni = async (req, res) => {
         res.send(client)
     } catch (err) {
         console.log(err)
+        console.log('CheckDni ->', client)
         res.status(500).send(err);
     }
 }
