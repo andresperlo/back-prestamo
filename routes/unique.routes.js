@@ -5,7 +5,7 @@ const router = express.Router();
 const authAdmin = require('../middleware/authAdmin');
 const authAdminSeller = require('../middleware/authAdminSeller');
 
-const Admin = require('../controllers/Admin')
+const Admin = require('../controllers/AdminSeller')
 
 router.post('/login', [
     check('user', 'Ingresar un usuario Correcto').notEmpty(),

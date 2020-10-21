@@ -62,9 +62,6 @@ const SellerSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref:'seller'
     },
-    date: {
-        type: String
-    },
     month:{
         type: String
     },

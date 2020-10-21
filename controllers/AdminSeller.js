@@ -4,8 +4,7 @@ const {validationResult} = require('express-validator')
 const multer = require('multer')
 let moment = require('moment'); // require
 moment.locale('es')
-const today = new Date().valueOf()
-const month = moment().format('MMMM');
+const month = moment().format('MMMM/YYYY');
 const year = moment().format('YYYY');
 const mongoose = require('mongoose');
 const bcryptjs = require('bcryptjs')
@@ -163,7 +162,6 @@ exports.CreateSales = async (req, res) => {
         feeAmount,
         saleDetail,
         seller: res.locals.user.id,
-        date: today.toString(),
         month: month,
         year: year,
         tokens: []
@@ -200,25 +198,14 @@ exports.getSalesAdmin = async (req, res) => {
     try {
         if (role == 'admin') {
 
-            let allSales = await SellerModel.find({ enable: true }).select('-_id -__v')
-
-            allSales = allSales.map(sales => {
-                sales.date = moment((parseInt(sales.date))).format('DD-MM-YYYY')
-                return sales
-            })
+            const allSales = await SellerModel.find({ enable: true }).select('-_id -__v')
 
             res.send(allSales)
         } else if (role == 'seller') {
 
-            let allSales = await SellerModel.find({ seller: res.locals.user.id, enable: true  })
+            const allSales = await SellerModel.find({ seller: res.locals.user.id, enable: true  })
                 .populate('seller', 'fullname -_id')
                 .select('-_id -sellerName')
-            
-
-            allSales = allSales.map(sale => {
-                sale.date = moment((parseInt(sale.date))).format('DD-MM-YYYY')
-                return sale
-            })
 
             res.send(allSales)
         }
@@ -231,12 +218,8 @@ exports.getSalesFalseAdmin = async (req, res) => {
 
     try {
 
-        let allSalesFalse = await SellerModel.find({ enable: false }).select('-_id -__v')
+        const allSalesFalse = await SellerModel.find({ enable: false }).select('-_id -__v')
 
-        allSalesFalse = allSalesFalse.map(sales => {
-            sales.date = moment((parseInt(sales.date))).format('DD-MM-YYYY')
-            return sales
-        })
         res.send(allSalesFalse)
     } catch (err) {
         res.status(500).send(err);
@@ -247,9 +230,7 @@ exports.GetUserDni = async (req, res) => {
     try {
         const { body } = req
 
-        let user = await SellerModel.findOne({ dniClient: body.dniClient }).select('-_id -roleType -token -__v');
-
-        user.date = moment((parseInt(user.date))).format('DD-MM-YYYY')
+        const user = await SellerModel.findOne({ dniClient: body.dniClient }).select('-_id -roleType -token -__v');
 
         if (!user) {
             return res.status(400).json({ mensaje: 'No se encuentra el DNI en la base de datos' })
@@ -263,43 +244,14 @@ exports.GetUserDni = async (req, res) => {
 exports.SearchOneSale = async (req, res) => {
     try {
 
-        let sale = await SellerModel.findById(req.params.id)
+        const sale = await SellerModel.findById(req.params.id)
             .populate('seller', '-_id fullname')
             .select('-_id -roleType -token -__v -month -year');
-
-        sale.date = moment((parseInt(sale.date))).format('DD-MM-YYYY')
 
         if (!sale) {
             return res.status(400).json({ mensaje: 'No se encuentra al Vendedor en la base de datos' })
         }
         res.send(sale)
-    } catch (err) {
-        res.status(500).send(err);
-    }
-}
-
-exports.GetOneDate = async (req, res) => {
-    try {
-        const { body } = req
-
-        const getSales = await SellerModel.find({});
-
-        let GetDate = getSales.filter(getDate => {
-            const date = moment((parseInt(getDate.date))).format('DD-MM-YYYY')
-            console.log('date->', date, 'body.date ->', body.date);
-            return date == body.date
-        })
-
-        GetDate = GetDate.map(oneDate => {
-            oneDate.date = moment((parseInt(oneDate.date))).format('DD-MM-YYYY')
-            return oneDate
-        })
-
-        if (!getSales.length) {
-            return res.status(400).json({ mensaje: 'No se encuentra la fecha en la base de datos' })
-        }
-
-        res.send(GetDate)
     } catch (err) {
         res.status(500).send(err);
     }
@@ -325,7 +277,7 @@ exports.GetMonth = async (req, res) => {
                 .select('-_id -roleType -token -__v');
 
             const GetMonth = month.filter(getMonth => {
-                const Gmonth = moment(getMonth.Month).format('MMMM')
+                const Gmonth = moment(getMonth.Month).format('MMMM/YYYY')
                 console.log('Month->', Gmonth, 'body.Month ->', body.month);
                 return Gmonth == body.month
             })
@@ -424,9 +376,7 @@ exports.PutSales = async (req, res) => {
             return res.status(400).json({ mensaje: 'No hay resultado para la Busqueda' });
         }
 
-        let sales = await SellerModel.findByIdAndUpdate(req.params.id, req.body, { new: true })
-
-        sales.date = moment((parseInt(sales.date))).format('DD-MM-YYYY')
+        const sales = await SellerModel.findByIdAndUpdate(req.params.id, req.body, { new: true })
 
         res.send(sales)
     } catch (err) {
@@ -437,9 +387,7 @@ exports.PutSales = async (req, res) => {
 exports.SalesDis = async (req, res) => {
 
     try {
-        let sales = await SellerModel.findByIdAndUpdate(req.params.id, { enable: false }, { new: true })
-
-        sales.date = moment((parseInt(sales.date))).format('DD-MM-YYYY')
+        const sales = await SellerModel.findByIdAndUpdate(req.params.id, { enable: false }, { new: true })
 
         res.send(sales)
     } catch (err) {
@@ -450,9 +398,7 @@ exports.SalesDis = async (req, res) => {
 exports.SalesEn = async (req, res) => {
 
     try {
-        let sales = await SellerModel.findByIdAndUpdate(req.params.id, { enable: true }, { new: true }).select('-_id -token -password -__v -user')
-
-        sales.date = moment((parseInt(sales.date))).format('DD-MM-YYYY')
+        const sales = await SellerModel.findByIdAndUpdate(req.params.id, { enable: true }, { new: true }).select('-_id -token -password -__v -user')
 
         res.send(sales)
     } catch (err) {
