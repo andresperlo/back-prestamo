@@ -82,7 +82,7 @@ exports.getAllSales = async (req, res) => {
             return sale
         })
 
-        res.json({ allSales })
+        res.send(allSales)
 
     } catch (err) {
         console.log('err', err)
