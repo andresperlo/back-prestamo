@@ -31,9 +31,18 @@ exports.login = async (req, res) => {
         return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos' });
     }
 
-   /*  if (SellerLogin.enable === false || AdminLogin.enable === false) {
-        return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos Seller o Admin' });
-    } */
+    if (AdminLogin) {
+        if (AdminLogin.enable !== true) {
+            return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos Seller o Admin' });
+        }
+    }
+
+    if (SellerLogin) {
+        if (SellerLogin.enable !== true) {
+            return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos Seller o Admin' });
+        }
+    }
+
     const passCheck = SellerLogin ? await bcryptjs.compare(body.password, SellerLogin.password)
         :
         await bcryptjs.compare(body.password, AdminLogin.password)
