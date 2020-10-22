@@ -58,14 +58,15 @@ router.get('/allsalesfalse', authAdmin('admin'), Admin.getSalesFalseAdmin)
 router.get('/onesaledni', authAdminSeller(['admin', 'seller']), Admin.GetUserDni)
 router.get('/onesale/:id', authAdmin('admin'), Admin.SearchOneSale)
 
-router.get('/salesmonth', authAdminSeller(['admin', 'seller']), Admin.GetMonth)
+router.get('/salemonth', authAdminSeller(['admin', 'seller']), Admin.SearchOneMonth)
+router.get('/getmonth', authAdminSeller(['admin', 'seller']), Admin.GetMonth)
 router.get('/salesyear', authAdminSeller(['admin', 'seller']), Admin.GetYear)
 router.get('/allseller', authAdmin('admin'), Admin.getSellerAdmin)
 router.get('/allsellerfalse', authAdmin('admin'), Admin.getSellerFalseAdmin)
 router.get('/oneseller', authAdmin('admin'), Admin.SearchOneSeller)
 
 /* ventas */
-router.put('/salesupdate/:id', authAdmin('admin'), Admin.PutSales)
+router.put('/salesupdate/:id', authAdmin('admin'), Admin.PutSales) 
 router.put('/salesdisenable/:id', authAdmin('admin'), Admin.SalesDis)
 router.put('/salesenable/:id', authAdmin('admin'), Admin.SalesEn)
 /* vendedores */

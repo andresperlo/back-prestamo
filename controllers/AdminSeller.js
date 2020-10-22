@@ -1,9 +1,10 @@
 const fs = require('fs')
 const path = require('path')
-const {validationResult} = require('express-validator')
+const { validationResult } = require('express-validator')
 const multer = require('multer')
 let moment = require('moment'); // require
 moment.locale('es')
+const today = moment().format('DD/MM/YYYY');
 const month = moment().format('MMMM/YYYY');
 const year = moment().format('YYYY');
 const mongoose = require('mongoose');
@@ -13,6 +14,7 @@ const SellerModel = require('../models/SellerModel');
 const AdminModel = require('../models/AdminModel');
 const AdminCreateModel = require('../models/CreateAdminModel');
 const sendNodeMail = require('../middleware/nodemailer');
+const { listenerCount } = require('process');
 
 exports.login = async (req, res) => {
     const errors = validationResult(req)
@@ -22,16 +24,19 @@ exports.login = async (req, res) => {
 
     const { body } = req
 
-    const AdminLogin = await AdminCreateModel.findOne({ user: body.user }) 
+    const AdminLogin = await AdminCreateModel.findOne({ user: body.user })
     const SellerLogin = await AdminModel.findOne({ user: body.user });
     
     if (!AdminLogin && !SellerLogin) {
         return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos' });
     }
 
-    const passCheck = SellerLogin ? await bcryptjs.compare(body.password, SellerLogin.password) 
-    :
-    await bcryptjs.compare(body.password, AdminLogin.password)
+   /*  if (SellerLogin.enable === false || AdminLogin.enable === false) {
+        return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos Seller o Admin' });
+    } */
+    const passCheck = SellerLogin ? await bcryptjs.compare(body.password, SellerLogin.password)
+        :
+        await bcryptjs.compare(body.password, AdminLogin.password)
     if (!passCheck) {
         return res.status(400).json({ mensaje: 'Usuario y/o CONTRASEÑA Incorrectos' })
     }
@@ -47,16 +52,18 @@ exports.login = async (req, res) => {
     try {
         const token = jsonwebtoken.sign(jwt_payload, process.env.JWT_SECRET, { expiresIn: process.env.TIME_EXP })
         if (AdminLogin) {
-            AdminLogin.token = [ token ] 
-            await AdminModel.update({ user: AdminLogin.user }, AdminLogin)
-            res.send({ mensaje: 'Logueado Correctamente', token,  role: AdminLogin.roleType, id: AdminLogin._id })
+            AdminLogin.token = [token]
+            await AdminCreateModel.update({ user: AdminLogin.user }, AdminLogin)
+            res.send({ mensaje: 'Logueado Correctamente', token, role: AdminLogin.roleType, id: AdminLogin._id })
         } else {
-            SellerLogin.token = [ token ]
-            await SellerModel.update({ user: SellerLogin.user }, SellerLogin)
-            res.send({ mensaje: 'Logueado Correctamente', token,  role: SellerLogin.roleType, id: SellerLogin._id })
+            SellerLogin.token = [token]
+            await AdminModel.update({ user: SellerLogin.user }, SellerLogin)
+            res.send({ mensaje: 'Logueado Correctamente', token, role: SellerLogin.roleType, id: SellerLogin._id })
         }
+
+        console.log('token ->', token)
+
     } catch (error) {
-        console.log('error500 login ->', error)
         return res.status(500).json({ mensaje: 'ERROR', error })
     }
 }
@@ -138,12 +145,12 @@ exports.CreateSeller = async (req, res) => {
 exports.CreateSales = async (req, res) => {
     console.log('reqFile ->', req.file)
     const { creditLine, typeOperation, newClient, nameClient, dniClient, celphoneClient,
-        amountApproved, quotaAmount, feeAmount, saleDetail} = req.body
+        amountApproved, quotaAmount, feeAmount, saleDetail } = req.body
 
     const file = req.file
     const sellerName = req.body.sellerName ? req.body.sellerName : res.locals.user.fullname
     const email = res.locals.user.email
-    
+
     let userExists = await SellerModel.findOne({ dniClient });
     if (userExists) {
         return res.status(400).json({ mensaje: 'El Usuario ya existe' })
@@ -162,6 +169,7 @@ exports.CreateSales = async (req, res) => {
         feeAmount,
         saleDetail,
         seller: res.locals.user.id,
+        date: today,
         month: month,
         year: year,
         tokens: []
@@ -181,7 +189,7 @@ exports.CreateSales = async (req, res) => {
 
     try {
 
-         await usuario.save();
+        await usuario.save();
         await sendNodeMail(SendPdf.subject, SendPdf.msg, SendPdf.file, SendPdf.email)
         fs.unlink(path.join(__dirname, '..', file.path), err =>
             console.log('err', err))
@@ -194,18 +202,18 @@ exports.CreateSales = async (req, res) => {
 exports.getSalesAdmin = async (req, res) => {
 
     const role = res.locals.user.roleType
-
+    console.log('role', role)
     try {
         if (role == 'admin') {
 
-            const allSales = await SellerModel.find({ enable: true }).select('-_id -__v')
+            const allSales = await SellerModel.find({ enable: true }).select('-__v')
 
             res.send(allSales)
         } else if (role == 'seller') {
 
-            const allSales = await SellerModel.find({ seller: res.locals.user.id, enable: true  })
-                .populate('seller', 'fullname -_id')
-                .select('-_id -sellerName')
+            const allSales = await SellerModel.find({ seller: res.locals.user.id, enable: true })
+                .populate('seller', 'fullname ')
+                .select(' -sellerName')
 
             res.send(allSales)
         }
@@ -218,7 +226,7 @@ exports.getSalesFalseAdmin = async (req, res) => {
 
     try {
 
-        const allSalesFalse = await SellerModel.find({ enable: false }).select('-_id -__v')
+        const allSalesFalse = await SellerModel.find({ enable: false }).select('-__v')
 
         res.send(allSalesFalse)
     } catch (err) {
@@ -230,7 +238,7 @@ exports.GetUserDni = async (req, res) => {
     try {
         const { body } = req
 
-        const user = await SellerModel.findOne({ dniClient: body.dniClient }).select('-_id -roleType -token -__v');
+        const user = await SellerModel.findOne({ dniClient: body.dniClient }).select('-roleType -token -__v');
 
         if (!user) {
             return res.status(400).json({ mensaje: 'No se encuentra el DNI en la base de datos' })
@@ -246,7 +254,7 @@ exports.SearchOneSale = async (req, res) => {
 
         const sale = await SellerModel.findById(req.params.id)
             .populate('seller', '-_id fullname')
-            .select('-_id -roleType -token -__v -month -year');
+            .select('-roleType -token -__v -month -year');
 
         if (!sale) {
             return res.status(400).json({ mensaje: 'No se encuentra al Vendedor en la base de datos' })
@@ -259,13 +267,39 @@ exports.SearchOneSale = async (req, res) => {
 
 exports.GetMonth = async (req, res) => {
 
+    const mes = moment().format('MMMM/YYYY');
+    console.log('mes actual ->', mes)
+
+    try {
+
+        let sales = await SellerModel.find({ seller: res.locals.user.id, month: mes })
+            .select('-_id -roleType -token -__v');
+
+        sales = sales.map(sale => {
+            sale.enable = true
+            return sale
+        })
+
+        if (!sales.length) {
+            return res.status(400).json({ mensaje: 'No se encuentra la fecha en la base de datos' })
+        }
+        res.send(sales)
+
+    } catch (err) {
+        console.log('error de GetMonth', err)
+        res.status(500).send(err);
+    }
+}
+
+exports.SearchOneMonth = async (req, res) => {
+
     const role = res.locals.user.roleType
     const { body } = req
 
     try {
         if (role == 'admin') {
 
-            const month = await SellerModel.find({ month: body.month }).select('-_id -roleType -token -__v');
+            const month = await SellerModel.find({ month: body.month, enable: true }).select('-roleType -token -__v');
 
             if (!month) {
                 return res.status(400).json({ mensaje: 'No se encuentra la fecha en la base de datos' })
@@ -273,8 +307,8 @@ exports.GetMonth = async (req, res) => {
             res.send(month)
         } else if (role == 'seller') {
 
-            const month = await SellerModel.find({ seller: res.locals.user.id })
-                .select('-_id -roleType -token -__v');
+            const month = await SellerModel.find({ seller: res.locals.user.id, enable: true })
+                .select('-roleType -token -__v');
 
             const GetMonth = month.filter(getMonth => {
                 const Gmonth = moment(getMonth.Month).format('MMMM/YYYY')
@@ -301,7 +335,7 @@ exports.GetYear = async (req, res) => {
     try {
         if (role == 'admin') {
 
-            const year = await SellerModel.find({ year: body.year }).select('-_id -roleType -token -__v');
+            const year = await SellerModel.find({ year: body.year }).select('-roleType -token -__v');
 
             if (!year) {
                 return res.status(400).json({ mensaje: 'No se encuentra la fecha en la base de datos' })
@@ -310,7 +344,7 @@ exports.GetYear = async (req, res) => {
         } else if (role == 'seller') {
 
             const year = await SellerModel.find({ seller: res.locals.user.id })
-                .select('-_id -roleType -token -__v');
+                .select('-roleType -token -__v');
 
             const GetYear = year.filter(getYear => {
                 const Gyear = moment(getYear.year).format('YYYY')
@@ -333,7 +367,7 @@ exports.getSellerAdmin = async (req, res) => {
 
     try {
 
-        const seller = await AdminModel.find({ enable: true }).select('-_id -token -password -__v -user -dni')
+        const seller = await AdminModel.find({ enable: true }).select('-token -password -__v -user -dni')
 
         res.send(seller)
     } catch (err) {
@@ -345,7 +379,7 @@ exports.getSellerFalseAdmin = async (req, res) => {
 
     try {
 
-        const seller = await AdminModel.find({ enable: false }).select('-_id -token -password -__v -user -dni')
+        const seller = await AdminModel.find({ enable: false }).select('-token -password -__v -user -dni')
 
         res.send(seller)
     } catch (err) {
@@ -354,11 +388,11 @@ exports.getSellerFalseAdmin = async (req, res) => {
 }
 
 exports.SearchOneSeller = async (req, res) => {
-    
+
     try {
         const { body } = req
 
-        const seller = await SellerModel.find({ fullname: body.fullname }).select('-_id -roleType -token -__v');
+        const seller = await SellerModel.find({ fullname: body.fullname }).select('-roleType -token -__v');
         if (!seller) {
             return res.status(400).json({ mensaje: 'No se encuentra al Vendedor en la base de datos' })
         }
@@ -398,7 +432,7 @@ exports.SalesDis = async (req, res) => {
 exports.SalesEn = async (req, res) => {
 
     try {
-        const sales = await SellerModel.findByIdAndUpdate(req.params.id, { enable: true }, { new: true }).select('-_id -token -password -__v -user')
+        const sales = await SellerModel.findByIdAndUpdate(req.params.id, { enable: true }, { new: true }).select('-token -password -__v -user')
 
         res.send(sales)
     } catch (err) {
@@ -415,7 +449,7 @@ exports.PutSeller = async (req, res) => {
         }
 
         const seller = await AdminModel.findByIdAndUpdate(req.params.id, req.body, { new: true })
-            .select('-token -password -__v -_id -roleType -enable')
+            .select('-token -password -__v -roleType -enable')
         res.send(seller)
     } catch (err) {
         res.status(500).send(err);
@@ -448,15 +482,15 @@ exports.Logout = async (req, res) => {
     try {
         const role = res.locals.user.roleType
 
-        if(role == 'admin'){
-           await AdminModel.updateOne({ _id: res.locals.user.id }, { $set: { token: [] } })
-        } else if(role == 'seller'){
-           await SellerModel.updateOne({ _id: res.locals.user.id }, { $set: { token: [] } })
+        if (role == 'admin') {
+            await AdminModel.updateOne({ _id: res.locals.user.id }, { $set: { token: [] } })
+        } else if (role == 'seller') {
+            await SellerModel.updateOne({ _id: res.locals.user.id }, { $set: { token: [] } })
         }
-        
-     res.json({ mensaje: 'Deslogueo ok' }) 
-   } catch (error) {
-       console.log('error Logout Amin ->', error)
-       res.status(500).send({ mensaje: 'Error', error })
-   }
+
+        res.json({ mensaje: 'Deslogueo ok' })
+    } catch (error) {
+        console.log('error Logout Amin ->', error)
+        res.status(500).send({ mensaje: 'Error', error })
+    }
 } 

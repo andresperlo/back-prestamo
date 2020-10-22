@@ -12,7 +12,7 @@ module.exports = (role) => async (req, res, next) => {
         
         const AdminLogin = await AdminModel.findOne({ _id: verificar.user.id, token: token });
         const SellerLogin = await SellerModel.findOne({ _id: verificar.user.id, token: token })
-
+        
         if (!AdminLogin && !SellerLogin) {
             return res.status(401).json({ mensaje: 'Dentro: No Autorizado' })
         }
