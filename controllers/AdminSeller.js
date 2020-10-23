@@ -65,11 +65,11 @@ exports.login = async (req, res) => {
         if (AdminLogin) {
             AdminLogin.token = [token]
             await AdminCreateModel.update({ user: AdminLogin.user }, AdminLogin)
-            res.send({ mensaje: 'Logueado Correctamente', token, role: AdminLogin.roleType, id: AdminLogin._id })
+            res.send({ mensaje: 'Logueado Correctamente', token, role: AdminLogin.roleType, id: AdminLogin._id, fullname: AdminLogin.fullname })
         } else {
             SellerLogin.token = [token]
             await AdminModel.update({ user: SellerLogin.user }, SellerLogin)
-            res.send({ mensaje: 'Logueado Correctamente', token, role: SellerLogin.roleType, id: SellerLogin._id })
+            res.send({ mensaje: 'Logueado Correctamente', token, role: SellerLogin.roleType, id: SellerLogin._id, fullname: SellerLogin.fullname })
         }
 
         console.log('token ->', token)
