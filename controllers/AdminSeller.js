@@ -55,7 +55,8 @@ exports.login = async (req, res) => {
         user: {
             id: AdminLogin ? AdminLogin.id : SellerLogin.id,
             user: AdminLogin ? AdminLogin.user : SellerLogin.user,
-            role: AdminLogin ? AdminLogin.roleType : SellerLogin.roleType
+            role: AdminLogin ? AdminLogin.roleType : SellerLogin.roleType,
+            fullname: AdminLogin ? AdminLogin.fullname : SellerLogin.fullname
         }
     }
 
@@ -158,6 +159,7 @@ exports.CreateSales = async (req, res) => {
         amountApproved, quotaAmount, feeAmount, saleDetail } = req.body
 
     const file = req.file
+    console.log('myFiles Backend ->', file.path)
     const sellerName = req.body.sellerName ? req.body.sellerName : res.locals.user.fullname
     const email = res.locals.user.email
 
