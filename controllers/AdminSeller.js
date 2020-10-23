@@ -163,11 +163,7 @@ exports.CreateSales = async (req, res) => {
 
     const userExists = await SellerModel.findOne({ dniClient });
 
-    if (userExists.quotaAmount > 3) {
-        fs.unlink(path.join(__dirname, '..', file.path), err =>
-            console.log('err', err))
-        return res.status(400).json({ mensaje: 'No puede tener el prestamo. Cuota mayor a 3' })
-    } else {
+    if (!userExists) {
 
         CreateSalesUser = {
             sellerName,
@@ -187,7 +183,36 @@ exports.CreateSales = async (req, res) => {
             year: year,
             tokens: []
         };
+    }
 
+    if (userExists) {
+        if (userExists.quotaAmount > 3) {
+
+            fs.unlink(path.join(__dirname, '..', file.path), err =>
+                console.log('err', err))
+            return res.status(400).json({ mensaje: 'No puede tener el prestamo. Cuota mayor a 3' })
+        } else {
+
+            CreateSalesUser = {
+                sellerName,
+                creditLine,
+                typeOperation,
+                newClient,
+                nameClient,
+                dniClient,
+                celphoneClient,
+                amountApproved,
+                quotaAmount,
+                feeAmount,
+                saleDetail,
+                seller: res.locals.user.id,
+                date: today,
+                month: month,
+                year: year,
+                tokens: []
+            };
+
+        }
     }
 
     console.log('user ->', CreateSalesUser.file);
