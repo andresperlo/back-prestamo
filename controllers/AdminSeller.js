@@ -254,7 +254,7 @@ exports.GetUserDni = async (req, res) => {
     try {
         const { body } = req
 
-        const user = await SellerModel.findOne({ dniClient: body.dniClient }).select('-roleType -token -__v');
+        const user = await SellerModel.find({ dniClient: body.dniClient }).select('-roleType -token -__v');
 
         if (!user) {
             return res.status(400).json({ mensaje: 'No se encuentra el DNI en la base de datos' })
