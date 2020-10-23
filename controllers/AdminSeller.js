@@ -14,7 +14,6 @@ const SellerModel = require('../models/SellerModel');
 const AdminModel = require('../models/AdminModel');
 const AdminCreateModel = require('../models/CreateAdminModel');
 const sendNodeMail = require('../middleware/nodemailer');
-const { listenerCount } = require('process');
 
 exports.login = async (req, res) => {
     const errors = validationResult(req)
@@ -26,13 +25,13 @@ exports.login = async (req, res) => {
 
     const AdminLogin = await AdminCreateModel.findOne({ user: body.user })
     const SellerLogin = await AdminModel.findOne({ user: body.user });
-    
+
     if (!AdminLogin && !SellerLogin) {
         return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos' });
     }
     console.log('sellerlogin', SellerLogin)
     console.log('adminLogin', AdminLogin)
-    
+
     if (AdminLogin) {
         if (AdminLogin.enable !== true) {
             return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos' });
@@ -44,7 +43,7 @@ exports.login = async (req, res) => {
             return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos' });
         }
     }
-    
+
     const passCheck = SellerLogin ? await bcryptjs.compare(body.password, SellerLogin.password)
         :
         await bcryptjs.compare(body.password, AdminLogin.password)
@@ -162,34 +161,40 @@ exports.CreateSales = async (req, res) => {
     const sellerName = req.body.sellerName ? req.body.sellerName : res.locals.user.fullname
     const email = res.locals.user.email
 
-    let userExists = await SellerModel.findOne({ dniClient });
-    if (userExists) {
-        return res.status(400).json({ mensaje: 'El Usuario ya existe' })
+    const userExists = await SellerModel.findOne({ dniClient });
+
+    if (userExists.quotaAmount > 3) {
+        fs.unlink(path.join(__dirname, '..', file.path), err =>
+            console.log('err', err))
+        return res.status(400).json({ mensaje: 'No puede tener el prestamo. Cuota mayor a 3' })
+    } else {
+
+        CreateSalesUser = {
+            sellerName,
+            creditLine,
+            typeOperation,
+            newClient,
+            nameClient,
+            dniClient,
+            celphoneClient,
+            amountApproved,
+            quotaAmount,
+            feeAmount,
+            saleDetail,
+            seller: res.locals.user.id,
+            date: today,
+            month: month,
+            year: year,
+            tokens: []
+        };
+
     }
 
-    const user = {
-        sellerName,
-        creditLine,
-        typeOperation,
-        newClient,
-        nameClient,
-        dniClient,
-        celphoneClient,
-        amountApproved,
-        quotaAmount,
-        feeAmount,
-        saleDetail,
-        seller: res.locals.user.id,
-        date: today,
-        month: month,
-        year: year,
-        tokens: []
-    };
-
-    console.log('user ->', user.file);
-
-    const usuario = new SellerModel(user);
+    console.log('user ->', CreateSalesUser.file);
+    const usuario = new SellerModel(CreateSalesUser);
     console.log('usuario ->', usuario)
+    await usuario.save();
+
 
     const SendPdf = {
         subject: 'Nueva Venta',
@@ -200,12 +205,12 @@ exports.CreateSales = async (req, res) => {
 
     try {
 
-        await usuario.save();
         await sendNodeMail(SendPdf.subject, SendPdf.msg, SendPdf.file, SendPdf.email)
         fs.unlink(path.join(__dirname, '..', file.path), err =>
             console.log('err', err))
-        res.send({ mensaje: 'Venta Cargada Correctamente', user })
+        res.send({ mensaje: 'Venta Cargada Correctamente', CreateSalesUser })
     } catch (error) {
+        console.log('error de regsales ->', error)
         res.status(500).send(error);
     }
 }
@@ -284,6 +289,7 @@ exports.GetMonth = async (req, res) => {
     try {
 
         let sales = await SellerModel.find({ seller: res.locals.user.id, month: mes })
+            .populate('seller', 'fullname')
             .select('-roleType -token -__v');
 
         sales = sales.map(sale => {
