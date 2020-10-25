@@ -56,7 +56,8 @@ exports.login = async (req, res) => {
         user: {
             id: AdminLogin ? AdminLogin.id : SellerLogin.id,
             user: AdminLogin ? AdminLogin.user : SellerLogin.user,
-            role: AdminLogin ? AdminLogin.roleType : SellerLogin.roleType
+            role: AdminLogin ? AdminLogin.roleType : SellerLogin.roleType,
+            name: AdminLogin ? AdminLogin.fullname : SellerLogin.fullname
         }
     }
 
