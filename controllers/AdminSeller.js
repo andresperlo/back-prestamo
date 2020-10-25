@@ -71,11 +71,10 @@ exports.login = async (req, res) => {
             await AdminModel.update({ user: SellerLogin.user }, SellerLogin)
             res.send({ mensaje: 'Logueado Correctamente', token, role: SellerLogin.roleType, id: SellerLogin._id, fullname: SellerLogin.fullname })
         }
-
         console.log('token ->', token)
 
     } catch (error) {
-        return res.status(500).json({ mensaje: 'ERROR', error })
+        return res.status(500).json({ mensaje: 'ERROR', error  })
     }
 }
 
@@ -158,10 +157,7 @@ exports.CreateSales = async (req, res) => {
     const { creditLine, typeOperation, newClient, nameClient, dniClient, celphoneClient,
         amountApproved, quotaAmount, feeAmount, saleDetail } = req.body
 
-    const file = req.file
-    console.log('myFiles Backend ->', file.path)
     const sellerName = req.body.sellerName ? req.body.sellerName : res.locals.user.fullname
-    const email = res.locals.user.email
 
     const userExists = await SellerModel.findOne({ dniClient });
 
@@ -189,9 +185,6 @@ exports.CreateSales = async (req, res) => {
 
     if (userExists) {
         if (userExists.quotaAmount > 3) {
-
-            fs.unlink(path.join(__dirname, '..', file.path), err =>
-                console.log('err', err))
             return res.status(400).json({ mensaje: 'No puede tener el prestamo. Cuota mayor a 3' })
         } else {
 
@@ -216,30 +209,48 @@ exports.CreateSales = async (req, res) => {
 
         }
     }
-
     console.log('user ->', CreateSalesUser.file);
     const usuario = new SellerModel(CreateSalesUser);
+
+    console.log('usuario->', usuario.id)
     console.log('usuario ->', usuario)
     await usuario.save();
 
-
-    const SendPdf = {
-        subject: 'Nueva Venta',
-        msg: '¡Nueva Venta de ' + sellerName + '!',
-        file: file,
-        email: email
-    }
-
     try {
-
-        await sendNodeMail(SendPdf.subject, SendPdf.msg, SendPdf.file, SendPdf.email)
-        fs.unlink(path.join(__dirname, '..', file.path), err =>
-            console.log('err', err))
-        res.send({ mensaje: 'Venta Cargada Correctamente', CreateSalesUser })
+        res.send({ mensaje: 'Venta Cargada Correctamente', CreateSalesUser, id: usuario._id })
     } catch (error) {
         console.log('error de regsales ->', error)
         res.status(500).send(error);
     }
+}
+
+
+exports.pdf = async (req, res) => {
+
+    const file = req.file
+    console.log('files.file ->', req.file)
+    console.log('myFiles Backend ->', file.path)
+
+    const IdPdf = await SellerModel.findById(req.params.id)
+
+    if (!IdPdf) {
+        return res.status(400).json({ message: 'id not found.' });
+    }
+
+    const SendPdf = {
+        subject: 'Nueva Venta',
+        msg: '¡Nueva Venta de ' + CreateSalesUser.sellerName + '!',
+        file: file,
+        email: CreateSalesUser.email
+    }
+
+    console.log('sendPdf ->', SendPdf)
+
+    await sendNodeMail(SendPdf.subject, SendPdf.msg, SendPdf.file, SendPdf.email)
+    fs.unlink(path.join(__dirname, '..', file.path), err =>
+        console.log('err', err))
+    res.send('Envio de PDF')
+
 }
 
 exports.getSalesAdmin = async (req, res) => {

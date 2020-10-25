@@ -39,7 +39,7 @@ router.post('/regseller', [
     check('password', 'la contraseña debe tener un mínimo de 8 caracteres').isLength({ min: 8 })
 ], authAdmin('admin'), Admin.CreateSeller)
 
-router.post('/regsales', upload.single('myFile'), [
+router.post('/regsales', [
     check('sellername', 'Campo Nombre del Vendedor Vacio').notEmpty(),
     check('creditLine', 'Campo lineaCredito Vació').notEmpty(),
     check('typeOperation', 'Ingresar un tipOperacion Correcto').notEmpty(),
@@ -52,6 +52,8 @@ router.post('/regsales', upload.single('myFile'), [
     check('feeAmount', ' Campo Vacio. montoCuota').notEmpty(),
     check('saleDetail', ' Campo Vacio. detalleVenta').notEmpty(),
 ], authAdminSeller(['admin', 'seller']), Admin.CreateSales)
+
+router.post('/regsales/:id/sendpdf', upload.single('myFile'), Admin.pdf)
 
 router.get('/allsales', authAdminSeller(['admin', 'seller']), Admin.getSalesAdmin)
 router.get('/allsalesfalse', authAdmin('admin'), Admin.getSalesFalseAdmin)
