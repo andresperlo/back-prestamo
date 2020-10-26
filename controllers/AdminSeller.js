@@ -74,7 +74,7 @@ exports.login = async (req, res) => {
         console.log('token ->', token)
 
     } catch (error) {
-        return res.status(500).json({ mensaje: 'ERROR', error  })
+        return res.status(500).json({ mensaje: 'ERROR', error })
     }
 }
 
@@ -153,18 +153,19 @@ exports.CreateSeller = async (req, res) => {
 }
 
 exports.CreateSales = async (req, res) => {
-    console.log('reqFile ->', req.file)
+
     const { creditLine, typeOperation, newClient, nameClient, dniClient, celphoneClient,
         amountApproved, quotaAmount, feeAmount, saleDetail } = req.body
 
     const sellerName = req.body.sellerName ? req.body.sellerName : res.locals.user.fullname
-
+    const email = res.locals.user.email
     const userExists = await SellerModel.findOne({ dniClient });
 
     if (!userExists) {
 
         CreateSalesUser = {
             sellerName,
+            email,
             creditLine,
             typeOperation,
             newClient,
@@ -184,12 +185,14 @@ exports.CreateSales = async (req, res) => {
     }
 
     if (userExists) {
+        console.log('userExist ->', userExists)
         if (userExists.quotaAmount > 3) {
             return res.status(400).json({ mensaje: 'No puede tener el prestamo. Cuota mayor a 3' })
         } else {
 
             CreateSalesUser = {
                 sellerName,
+                email,
                 creditLine,
                 typeOperation,
                 newClient,
@@ -209,11 +212,11 @@ exports.CreateSales = async (req, res) => {
 
         }
     }
-    console.log('user ->', CreateSalesUser.file);
-    const usuario = new SellerModel(CreateSalesUser);
+
+    const usuario = new SellerModel(CreateSalesUser)
 
     console.log('usuario->', usuario.id)
-    console.log('usuario ->', usuario)
+    console.log('usuario email ->', usuario.email)
     await usuario.save();
 
     try {
@@ -227,29 +230,38 @@ exports.CreateSales = async (req, res) => {
 
 exports.pdf = async (req, res) => {
 
-    const file = req.file
-    console.log('files.file ->', req.file)
-    console.log('myFiles Backend ->', file.path)
-
     const IdPdf = await SellerModel.findById(req.params.id)
 
     if (!IdPdf) {
         return res.status(400).json({ message: 'id not found.' });
     }
 
-    const SendPdf = {
-        subject: 'Nueva Venta',
-        msg: '¡Nueva Venta de ' + CreateSalesUser.sellerName + '!',
-        file: file,
-        email: CreateSalesUser.email
+    try {
+
+        const file = req.file
+
+        console.log('files.file ->', req.file)
+        console.log('myFiles Backend ->', file.path)
+        
+        const SendPdf = {
+            subject: 'Nueva Venta',
+            msg: '¡Nueva Venta de ' + CreateSalesUser.sellerName + '!',
+            file: file,
+            email: CreateSalesUser.email
+        }
+
+        console.log('sendPdf ->', SendPdf)
+
+        await sendNodeMail(SendPdf.subject, SendPdf.msg, SendPdf.file, SendPdf.email)
+        fs.unlink(path.join(__dirname, '..', file.path), err =>
+            console.log('err', err))
+        res.send('Envio de PDF')
+    } catch (error) {
+        console.log(error)
+        IdPdf.deleteOne()
+        return res.status(500).json({ message: 'Error 500' });
+
     }
-
-    console.log('sendPdf ->', SendPdf)
-
-    await sendNodeMail(SendPdf.subject, SendPdf.msg, SendPdf.file, SendPdf.email)
-    fs.unlink(path.join(__dirname, '..', file.path), err =>
-        console.log('err', err))
-    res.send('Envio de PDF')
 
 }
 
