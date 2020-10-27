@@ -14,7 +14,6 @@ const SellerModel = require('../models/SellerModel');
 const AdminModel = require('../models/AdminModel');
 const AdminCreateModel = require('../models/CreateAdminModel');
 const sendNodeMail = require('../middleware/nodemailer');
-const { listenerCount } = require('process');
 
 exports.login = async (req, res) => {
     const errors = validationResult(req)
@@ -26,7 +25,7 @@ exports.login = async (req, res) => {
 
     const AdminLogin = await AdminCreateModel.findOne({ user: body.user })
     const SellerLogin = await AdminModel.findOne({ user: body.user });
-    
+
     if (!AdminLogin && !SellerLogin) {
         return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos' });
     }
@@ -57,7 +56,7 @@ exports.login = async (req, res) => {
             id: AdminLogin ? AdminLogin.id : SellerLogin.id,
             user: AdminLogin ? AdminLogin.user : SellerLogin.user,
             role: AdminLogin ? AdminLogin.roleType : SellerLogin.roleType,
-            name: AdminLogin ? AdminLogin.fullname : SellerLogin.fullname
+            fullname: AdminLogin ? AdminLogin.fullname : SellerLogin.fullname
         }
     }
 
@@ -66,23 +65,22 @@ exports.login = async (req, res) => {
         if (AdminLogin) {
             AdminLogin.token = [token]
             await AdminCreateModel.update({ user: AdminLogin.user }, AdminLogin)
-            res.send({ mensaje: 'Logueado Correctamente', token, role: AdminLogin.roleType, id: AdminLogin._id })
+            res.send({ mensaje: 'Logueado Correctamente', token, role: AdminLogin.roleType, id: AdminLogin._id, fullname: AdminLogin.fullname })
         } else {
             SellerLogin.token = [token]
             await AdminModel.update({ user: SellerLogin.user }, SellerLogin)
-            res.send({ mensaje: 'Logueado Correctamente', token, role: SellerLogin.roleType, id: SellerLogin._id })
+            res.send({ mensaje: 'Logueado Correctamente', token, role: SellerLogin.roleType, id: SellerLogin._id, fullname: SellerLogin.fullname })
         }
-
         console.log('token ->', token)
 
     } catch (error) {
-        return res.status(500).json({ mensaje: 'ERROR', error })
+        return res.status(500).json({ mensaje: 'ERROR', error  })
     }
 }
 
 exports.CreateAdmin = async (req, res) => {
 
-    const { fullname, dni, address, celphone, email, username, password } = req.body
+    const { fullname, dni, address, celphone, email, user, password } = req.body
 
     let userExists = await AdminCreateModel.findOne({ dni });
     if (userExists) {
@@ -100,7 +98,7 @@ exports.CreateAdmin = async (req, res) => {
         address,
         celphone,
         email,
-        username,
+        user,
         tokens: []
     };
 
@@ -159,56 +157,100 @@ exports.CreateSales = async (req, res) => {
     const { creditLine, typeOperation, newClient, nameClient, dniClient, celphoneClient,
         amountApproved, quotaAmount, feeAmount, saleDetail } = req.body
 
-    const file = req.file
     const sellerName = req.body.sellerName ? req.body.sellerName : res.locals.user.fullname
-    const email = res.locals.user.email
 
-    let userExists = await SellerModel.findOne({ dniClient });
-    if (userExists) {
-        return res.status(400).json({ mensaje: 'El Usuario ya existe' })
+    const userExists = await SellerModel.findOne({ dniClient });
+
+    if (!userExists) {
+
+        CreateSalesUser = {
+            sellerName,
+            creditLine,
+            typeOperation,
+            newClient,
+            nameClient,
+            dniClient,
+            celphoneClient,
+            amountApproved,
+            quotaAmount,
+            feeAmount,
+            saleDetail,
+            seller: res.locals.user.id,
+            date: today,
+            month: month,
+            year: year,
+            tokens: []
+        };
     }
 
-    const user = {
-        sellerName,
-        creditLine,
-        typeOperation,
-        newClient,
-        nameClient,
-        dniClient,
-        celphoneClient,
-        amountApproved,
-        quotaAmount,
-        feeAmount,
-        saleDetail,
-        seller: res.locals.user.id,
-        date: today,
-        month: month,
-        year: year,
-        tokens: []
-    };
+    if (userExists) {
+        if (userExists.quotaAmount > 3) {
+            return res.status(400).json({ mensaje: 'No puede tener el prestamo. Cuota mayor a 3' })
+        } else {
 
-    console.log('user ->', user.file);
+            CreateSalesUser = {
+                sellerName,
+                creditLine,
+                typeOperation,
+                newClient,
+                nameClient,
+                dniClient,
+                celphoneClient,
+                amountApproved,
+                quotaAmount,
+                feeAmount,
+                saleDetail,
+                seller: res.locals.user.id,
+                date: today,
+                month: month,
+                year: year,
+                tokens: []
+            };
 
-    const usuario = new SellerModel(user);
+        }
+    }
+    console.log('user ->', CreateSalesUser.file);
+    const usuario = new SellerModel(CreateSalesUser);
+
+    console.log('usuario->', usuario.id)
     console.log('usuario ->', usuario)
+    await usuario.save();
+
+    try {
+        res.send({ mensaje: 'Venta Cargada Correctamente', CreateSalesUser, id: usuario._id })
+    } catch (error) {
+        console.log('error de regsales ->', error)
+        res.status(500).send(error);
+    }
+}
+
+
+exports.pdf = async (req, res) => {
+
+    const file = req.file
+    console.log('files.file ->', req.file)
+    console.log('myFiles Backend ->', file.path)
+
+    const IdPdf = await SellerModel.findById(req.params.id)
+
+    if (!IdPdf) {
+        return res.status(400).json({ message: 'id not found.' });
+    }
 
     const SendPdf = {
         subject: 'Nueva Venta',
-        msg: '¡Nueva Venta de ' + sellerName + '!',
+        msg: '¡Nueva Venta de ' + CreateSalesUser.sellerName + '!',
         file: file,
-        email: email
+        email: CreateSalesUser.email
     }
 
-    try {
+    console.log('sendPdf ->', SendPdf)
 
-        await usuario.save();
-        await sendNodeMail(SendPdf.subject, SendPdf.msg, SendPdf.file, SendPdf.email)
-        fs.unlink(path.join(__dirname, '..', file.path), err =>
-            console.log('err', err))
-        res.send({ mensaje: 'Venta Cargada Correctamente', user })
-    } catch (error) {
-        res.status(500).send(error);
-    }
+    await sendNodeMail(SendPdf.subject, SendPdf.msg, SendPdf.file, SendPdf.email)
+    fs.unlink(path.join(__dirname, '..', file.path), err =>
+        console.log('err', err))
+    res.send('Envio de PDF')
+
 }
 
 exports.getSalesAdmin = async (req, res) => {
@@ -246,135 +288,6 @@ exports.getSalesFalseAdmin = async (req, res) => {
     }
 }
 
-exports.GetUserDni = async (req, res) => {
-    try {
-        const { body } = req
-
-        const user = await SellerModel.findOne({ dniClient: body.dniClient }).select('-roleType -token -__v');
-
-        if (!user) {
-            return res.status(400).json({ mensaje: 'No se encuentra el DNI en la base de datos' })
-        }
-        res.send(user)
-    } catch (err) {
-        res.status(500).send(err);
-    }
-}
-
-exports.SearchOneSale = async (req, res) => {
-    try {
-
-        const sale = await SellerModel.findById(req.params.id)
-            .populate('seller', '-_id fullname')
-            .select('-roleType -token -__v -month -year');
-
-        if (!sale) {
-            return res.status(400).json({ mensaje: 'No se encuentra al Vendedor en la base de datos' })
-        }
-        res.send(sale)
-    } catch (err) {
-        res.status(500).send(err);
-    }
-}
-
-exports.GetMonth = async (req, res) => {
-
-    const mes = moment().format('MMMM/YYYY');
-    console.log('mes actual ->', mes)
-
-    try {
-
-        let sales = await SellerModel.find({ seller: res.locals.user.id, month: mes })
-            .select('-roleType -token -__v');
-
-        sales = sales.map(sale => {
-            sale.enable = true
-            return sale
-        })
-
-        if (!sales.length) {
-            return res.status(400).json({ mensaje: 'No se encuentra la fecha en la base de datos' })
-        }
-        res.send(sales)
-
-    } catch (err) {
-        console.log('error de GetMonth', err)
-        res.status(500).send(err);
-    }
-}
-
-exports.SearchOneMonth = async (req, res) => {
-
-    const role = res.locals.user.roleType
-    const { body } = req
-
-    try {
-        if (role == 'admin') {
-
-            const month = await SellerModel.find({ month: body.month, enable: true }).select('-roleType -token -__v');
-
-            if (!month) {
-                return res.status(400).json({ mensaje: 'No se encuentra la fecha en la base de datos' })
-            }
-            res.send(month)
-        } else if (role == 'seller') {
-
-            const month = await SellerModel.find({ seller: res.locals.user.id, enable: true })
-                .select('-roleType -token -__v');
-
-            const GetMonth = month.filter(getMonth => {
-                const Gmonth = moment(getMonth.Month).format('MMMM/YYYY')
-                console.log('Month->', Gmonth, 'body.Month ->', body.month);
-                return Gmonth == body.month
-            })
-
-            if (!month) {
-                return res.status(400).json({ mensaje: 'No se encuentra la fecha en la base de datos' })
-            }
-            res.send(GetMonth)
-        }
-
-    } catch (err) {
-        res.status(500).send(err);
-    }
-}
-
-exports.GetYear = async (req, res) => {
-
-    const role = res.locals.user.roleType
-    const { body } = req
-
-    try {
-        if (role == 'admin') {
-
-            const year = await SellerModel.find({ year: body.year }).select('-roleType -token -__v');
-
-            if (!year) {
-                return res.status(400).json({ mensaje: 'No se encuentra la fecha en la base de datos' })
-            }
-            res.send(year)
-        } else if (role == 'seller') {
-
-            const year = await SellerModel.find({ seller: res.locals.user.id })
-                .select('-roleType -token -__v');
-
-            const GetYear = year.filter(getYear => {
-                const Gyear = moment(getYear.year).format('YYYY')
-                console.log('year->', Gyear, 'body.year ->', body.year);
-                return Gyear == body.year
-            })
-
-            if (!month) {
-                return res.status(400).json({ mensaje: 'No se encuentra la fecha en la base de datos' })
-            }
-            res.send(GetYear)
-        }
-
-    } catch (err) {
-        res.status(500).send(err);
-    }
-}
-
 exports.getSellerAdmin = async (req, res) => {
 
     try {
@@ -393,21 +306,6 @@ exports.getSellerFalseAdmin = async (req, res) => {
 
         const seller = await AdminModel.find({ enable: false }).select('-token -password -__v -user -dni')
 
-        res.send(seller)
-    } catch (err) {
-        res.status(500).send(err);
-    }
-}
-
-exports.SearchOneSeller = async (req, res) => {
-
-    try {
-        const { body } = req
-
-        const seller = await SellerModel.find({ fullname: body.fullname }).select('-roleType -token -__v');
-        if (!seller) {
-            return res.status(400).json({ mensaje: 'No se encuentra al Vendedor en la base de datos' })
-        }
         res.send(seller)
     } catch (err) {
         res.status(500).send(err);

@@ -21,7 +21,7 @@ router.post('/regadmin', [
     check('celphone', 'Campo celular Vacio').notEmpty(),
     check('email', 'Campo email Vacio').notEmpty(),
     check('email', 'Campo email Vacio').isEmail(),
-    check('username', 'Ingresar un usuario Correcto').notEmpty(),
+    check('user', 'Ingresar un usuario Correcto').notEmpty(),
     check('password', ' Campo Vacio. Contraseña').notEmpty(),
     check('password', 'la contraseña debe tener un mínimo de 8 caracteres').isLength({ min: 8 })
 ], authAdmin('admin'), Admin.CreateAdmin)
@@ -39,7 +39,7 @@ router.post('/regseller', [
     check('password', 'la contraseña debe tener un mínimo de 8 caracteres').isLength({ min: 8 })
 ], authAdmin('admin'), Admin.CreateSeller)
 
-router.post('/regsales', upload.single('myFile'), [
+router.post('/regsales', [
     check('sellername', 'Campo Nombre del Vendedor Vacio').notEmpty(),
     check('creditLine', 'Campo lineaCredito Vació').notEmpty(),
     check('typeOperation', 'Ingresar un tipOperacion Correcto').notEmpty(),
@@ -53,18 +53,13 @@ router.post('/regsales', upload.single('myFile'), [
     check('saleDetail', ' Campo Vacio. detalleVenta').notEmpty(),
 ], authAdminSeller(['admin', 'seller']), Admin.CreateSales)
 
+router.post('/regsales/:id/sendpdf', upload.single('myFile'), Admin.pdf)
+
 router.get('/allsales', authAdminSeller(['admin', 'seller']), Admin.getSalesAdmin)
 router.get('/allsalesfalse', authAdmin('admin'), Admin.getSalesFalseAdmin)
-router.get('/onesaledni', authAdminSeller(['admin', 'seller']), Admin.GetUserDni)
-router.get('/onesale/:id', authAdmin('admin'), Admin.SearchOneSale)
 
-router.get('/salemonth', authAdminSeller(['admin', 'seller']), Admin.SearchOneMonth)
-router.get('/getmonth', authAdminSeller(['admin', 'seller']), Admin.GetMonth)
-router.get('/salesyear', authAdminSeller(['admin', 'seller']), Admin.GetYear)
 router.get('/allseller', authAdmin('admin'), Admin.getSellerAdmin)
 router.get('/allsellerfalse', authAdmin('admin'), Admin.getSellerFalseAdmin)
-router.get('/oneseller', authAdmin('admin'), Admin.SearchOneSeller)
-
 /* ventas */
 router.put('/salesupdate/:id', authAdmin('admin'), Admin.PutSales) 
 router.put('/salesdisenable/:id', authAdmin('admin'), Admin.SalesDis)
