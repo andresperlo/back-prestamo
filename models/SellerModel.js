@@ -62,6 +62,9 @@ const SellerSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref:'seller'
     },
+    typeClient:{
+        type: String
+    },
     date:{
         type: String
     },

@@ -80,7 +80,7 @@ exports.login = async (req, res) => {
 
 exports.CreateAdmin = async (req, res) => {
 
-    const { fullname, dni, address, celphone, email, username, password } = req.body
+    const { fullname, dni, address, celphone, email, user, password } = req.body
 
     let userExists = await AdminCreateModel.findOne({ dni });
     if (userExists) {
@@ -98,7 +98,7 @@ exports.CreateAdmin = async (req, res) => {
         address,
         celphone,
         email,
-        username,
+        user,
         tokens: []
     };
 
