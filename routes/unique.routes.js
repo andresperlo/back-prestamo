@@ -21,7 +21,7 @@ router.post('/regadmin', [
     check('celphone', 'Campo celular Vacio').notEmpty(),
     check('email', 'Campo email Vacio').notEmpty(),
     check('email', 'Campo email Vacio').isEmail(),
-    check('username', 'Ingresar un usuario Correcto').notEmpty(),
+    check('user', 'Ingresar un usuario Correcto').notEmpty(),
     check('password', ' Campo Vacio. Contraseña').notEmpty(),
     check('password', 'la contraseña debe tener un mínimo de 8 caracteres').isLength({ min: 8 })
 ], authAdmin('admin'), Admin.CreateAdmin)
