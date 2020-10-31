@@ -56,12 +56,13 @@ router.post('/regsales', [
 router.post('/regsales/:id/sendpdf', upload.single('myFile'), Admin.pdf)
 
 router.get('/allsales', authAdminSeller(['admin', 'seller']), Admin.getSalesAdmin)
+router.get('/montosales', authAdminSeller(['admin', 'seller']), Admin.MontoSales)
 router.get('/allsalesfalse', authAdmin('admin'), Admin.getSalesFalseAdmin)
 
 router.get('/allseller', authAdmin('admin'), Admin.getSellerAdmin)
 router.get('/allsellerfalse', authAdmin('admin'), Admin.getSellerFalseAdmin)
 /* ventas */
-router.put('/salesupdate/:id', authAdmin('admin'), Admin.PutSales) 
+router.put('/salesupdate/:id', authAdmin('admin'), Admin.PutSales)
 router.put('/salesdisenable/:id', authAdmin('admin'), Admin.SalesDis)
 router.put('/salesenable/:id', authAdmin('admin'), Admin.SalesEn)
 /* vendedores */
