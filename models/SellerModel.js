@@ -1,86 +1,94 @@
 const mongoose = require('mongoose')
+const Paginate = require('mongoose-paginate-v2')
+const { paginate } = require('./AdminModel')
 
 const SellerSchema = new mongoose.Schema({
-    
-    sellerName:{
+
+    sellerName: {
         type: String,
         trim: true,
-        required:true  
+        required: true
     },
-    creditLine:{
+    creditLine: {
         type: String,
         trim: true,
-        required:true  
+        required: true
     },
     typeOperation: {
         type: String,
         trim: true,
-        required:true  
+        required: true
     },
-    newClient:{
+    newClient: {
         type: Boolean,
         trim: true,
-        required:true  
+        required: true
     },
-    nameClient:{
+    nameClient: {
         type: String,
         trim: true,
-        required:true  
+        required: true
     },
-    dniClient:{
+    dniClient: {
         type: Number,
         trim: true,
         unique: true,
-        required:true  
+        required: true
     },
     celphoneClient: {
         type: Number,
         required: true,
         trim: true,
     },
-    amountApproved:{
+    amountApproved: {
         type: Number,
         required: true,
         trim: true
     },
-    quotaAmount:{
+    quotaAmount: {
         type: Number,
         required: true,
         trim: true
     },
-    feeAmount:{
+    feeAmount: {
         type: Number,
         required: true,
         trim: true
     },
-    saleDetail:{
+    saleDetail: {
         type: String,
         // required: true,
         trim: true
     },
-    seller: { 
+    seller: {
         type: mongoose.Schema.Types.ObjectId,
-        ref:'seller'
+        ref: 'seller'
     },
-    typeClient:{
+    typeClient: {
         type: String
     },
-    date:{
+    date: {
         type: String
     },
-    month:{
+    month: {
+        type: String
+    },
+    exactMonth: {
         type: String
     },
     year: {
         type: String
     },
-    enable:{
+    enable: {
         type: Boolean,
-        required:true,
+        required: true,
         default: true
     }
 })
- 
+
+
+SellerSchema.plugin(Paginate)
+
 const SellerModel = mongoose.model('sales', SellerSchema)
 
 module.exports = SellerModel;

@@ -5,7 +5,8 @@ const multer = require('multer')
 let moment = require('moment'); // require
 moment.locale('es')
 const today = moment().format('DD/MM/YYYY');
-const month = moment().format('MMMM/YYYY');
+const month = moment().format('MM/YYYY');
+const exactMonth = moment().format('MMMM');
 const year = moment().format('YYYY');
 const mongoose = require('mongoose');
 const bcryptjs = require('bcryptjs')
@@ -13,6 +14,7 @@ const jsonwebtoken = require('jsonwebtoken')
 const SellerModel = require('../models/SellerModel');
 const AdminModel = require('../models/AdminModel');
 const AdminCreateModel = require('../models/CreateAdminModel');
+const VentasMensualModel = require('../models/VentasMensualModel');
 const sendNodeMail = require('../middleware/nodemailer');
 
 exports.login = async (req, res) => {
@@ -179,6 +181,7 @@ exports.CreateSales = async (req, res) => {
             seller: res.locals.user.id,
             date: today,
             month: month,
+            exactMonth: exactMonth,
             year: year,
             tokens: []
         };
@@ -206,6 +209,7 @@ exports.CreateSales = async (req, res) => {
                 seller: res.locals.user.id,
                 date: today,
                 month: month,
+                exactMonth: exactMonth,
                 year: year,
                 tokens: []
             };
@@ -213,13 +217,117 @@ exports.CreateSales = async (req, res) => {
         }
     }
 
-    const usuario = new SellerModel(CreateSalesUser)
-
-    console.log('usuario->', usuario.id)
-    console.log('usuario email ->', usuario.email)
-    await usuario.save();
+    let ventaTotal = await VentasMensualModel.findOne({ seller: res.locals.user.id, year: year })
 
     try {
+        const usuario = new SellerModel(CreateSalesUser)
+        await usuario.save();
+
+        if (!ventaTotal) {
+            ventaTotal = new VentasMensualModel({ seller: res.locals.user.id, year: year })
+
+            if (CreateSalesUser.exactMonth == 'enero') {
+                ventaTotal.enero += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'febrero') {
+                ventaTotal.febrero += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'marzo') {
+                ventaTotal.marzo += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'abril') {
+                ventaTotal.abril += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'mayo') {
+                ventaTotal.mayo += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'junio') {
+                ventaTotal.junio += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'julio') {
+                ventaTotal.julio += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'agosto') {
+                ventaTotal.agosto += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'septiembre') {
+                ventaTotal.septiembre += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'octubre') {
+                ventaTotal.octubre += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'noviembre') {
+                ventaTotal.noviembre += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'diciembre') {
+                ventaTotal.diciembre += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            }
+        } else {
+
+            if (CreateSalesUser.exactMonth == 'enero') {
+                ventaTotal.enero += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'febrero') {
+                ventaTotal.febrero += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'marzo') {
+                ventaTotal.marzo += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'abril') {
+                ventaTotal.abril += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'mayo') {
+                ventaTotal.mayo += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'junio') {
+                ventaTotal.junio += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'julio') {
+                ventaTotal.julio += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'agosto') {
+                ventaTotal.agosto += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'septiembre') {
+                ventaTotal.septiembre += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'octubre') {
+                ventaTotal.octubre += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'noviembre') {
+                ventaTotal.noviembre += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            } else if (CreateSalesUser.exactMonth == 'diciembre') {
+                ventaTotal.diciembre += CreateSalesUser.amountApproved
+                ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                ventaTotal.save()
+            }
+        }
+
         res.send({ mensaje: 'Venta Cargada Correctamente', CreateSalesUser, id: usuario._id })
     } catch (error) {
         console.log('error de regsales ->', error)
@@ -242,7 +350,7 @@ exports.pdf = async (req, res) => {
 
         console.log('files.file ->', req.file)
         console.log('myFiles Backend ->', file.path)
-        
+
         const SendPdf = {
             subject: 'Nueva Venta',
             msg: '¡Nueva Venta de ' + CreateSalesUser.sellerName + '!',
@@ -265,14 +373,46 @@ exports.pdf = async (req, res) => {
 
 }
 
-exports.getSalesAdmin = async (req, res) => {
+exports.MontoSales = async (req, res) => {
 
     const role = res.locals.user.roleType
     console.log('role', role)
+
     try {
         if (role == 'admin') {
 
-            const allSales = await SellerModel.find({ enable: true }).select('-__v')
+            const allSales = await VentasMensualModel.find({ year: year }).select('-__v')
+                .populate('seller', 'fullname ')
+                .select(' -sellerName')
+
+            res.send(allSales)
+
+        } else if (role == 'seller') {
+
+            const allSales = await VentasMensualModel.findOne({ seller: res.locals.user.id, year: year})
+                .populate('seller', 'fullname ')
+                .select(' -sellerName')
+
+                console.log('allSales ->', allSales)
+            res.send(allSales)
+        }
+    } catch (err) {
+        res.status(500).send(err);
+    }
+}
+
+exports.getSalesAdmin = async (req, res) => {
+
+    const limit = req.query.limit || 10;
+    const page = req.query.page || 1;
+
+    const role = res.locals.user.roleType
+    console.log('role', role)
+    console.log('limit ->', limit + ' ' + 'page ->', page)
+    try {
+        if (role == 'admin') {
+
+            const allSales = await SellerModel.paginate({enable: true}, { limit, page })
 
             res.send(allSales)
         } else if (role == 'seller') {
