@@ -389,11 +389,11 @@ exports.MontoSales = async (req, res) => {
 
         } else if (role == 'seller') {
 
-            const allSales = await VentasMensualModel.findOne({ seller: res.locals.user.id, year: year})
+            const allSales = await VentasMensualModel.findOne({ seller: res.locals.user.id, year: year })
                 .populate('seller', 'fullname ')
                 .select(' -sellerName')
 
-                console.log('allSales ->', allSales)
+            console.log('allSales ->', allSales)
             res.send(allSales)
         }
     } catch (err) {
@@ -405,25 +405,24 @@ exports.getSalesAdmin = async (req, res) => {
 
     const limit = req.query.limit || 10;
     const page = req.query.page || 1;
-
     const role = res.locals.user.roleType
     console.log('role', role)
     console.log('limit ->', limit + ' ' + 'page ->', page)
+
     try {
         if (role == 'admin') {
-
-            const allSales = await SellerModel.paginate({enable: true}, { limit, page })
-
+            let allSales = await SellerModel.paginate(req.body, { enable: true}, { limit, page })
+            
             res.send(allSales)
         } else if (role == 'seller') {
 
             const allSales = await SellerModel.find({ seller: res.locals.user.id, enable: true })
                 .populate('seller', 'fullname ')
-                .select(' -sellerName')
 
             res.send(allSales)
         }
     } catch (err) {
+        console.log('error paginate ->', err)
         res.status(500).send(err);
     }
 }
