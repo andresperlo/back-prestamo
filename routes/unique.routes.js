@@ -50,7 +50,7 @@ router.post('/regsales', [
     check('amountApproved', 'Campo Vacio. montoAprobado').notEmpty(),
     check('quotaAmount', ' Campo Vacio. cantidadCuota').notEmpty(),
     check('feeAmount', ' Campo Vacio. montoCuota').notEmpty(),
-    check('saleDetail', ' Campo Vacio. detalleVenta').notEmpty(),
+    // check('saleDetail', ' Campo Vacio. detalleVenta').notEmpty(),
 ], authAdminSeller(['admin', 'seller']), Admin.CreateSales)
 
 router.post('/regsales/:id/sendpdf', upload.single('myFile'), Admin.pdf)
