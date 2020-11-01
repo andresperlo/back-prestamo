@@ -1,4 +1,6 @@
 const mongoose = require('mongoose')
+const Paginate = require('mongoose-paginate-v2')
+const { paginate } = require('./AdminModel')
 
 const SellerSchema = new mongoose.Schema({
 
@@ -83,6 +85,9 @@ const SellerSchema = new mongoose.Schema({
         default: true
     }
 })
+
+
+SellerSchema.plugin(Paginate)
 
 const SellerModel = mongoose.model('sales', SellerSchema)
 

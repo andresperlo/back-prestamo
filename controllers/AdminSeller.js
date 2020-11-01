@@ -381,7 +381,7 @@ exports.MontoSales = async (req, res) => {
     try {
         if (role == 'admin') {
 
-            const allSales = await VentasMensualModel.find({ month: month }).select('-__v')
+            const allSales = await VentasMensualModel.find({ year: year }).select('-__v')
                 .populate('seller', 'fullname ')
                 .select(' -sellerName')
 
@@ -389,10 +389,11 @@ exports.MontoSales = async (req, res) => {
 
         } else if (role == 'seller') {
 
-            const allSales = await VentasMensualModel.findOne({ seller: res.locals.user.id, month: month })
+            const allSales = await VentasMensualModel.findOne({ seller: res.locals.user.id, year: year})
                 .populate('seller', 'fullname ')
                 .select(' -sellerName')
 
+                console.log('allSales ->', allSales)
             res.send(allSales)
         }
     } catch (err) {
@@ -402,12 +403,16 @@ exports.MontoSales = async (req, res) => {
 
 exports.getSalesAdmin = async (req, res) => {
 
+    const limit = req.query.limit || 10;
+    const page = req.query.page || 1;
+
     const role = res.locals.user.roleType
     console.log('role', role)
+    console.log('limit ->', limit + ' ' + 'page ->', page)
     try {
         if (role == 'admin') {
 
-            const allSales = await SellerModel.find({ enable: true }).select('-__v')
+            const allSales = await SellerModel.paginate({enable: true}, { limit, page })
 
             res.send(allSales)
         } else if (role == 'seller') {
