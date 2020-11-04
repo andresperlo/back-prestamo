@@ -1,4 +1,5 @@
 const { upload } = require('../middleware/upload')
+const formData = require("express-form-data");
 const express = require('express');
 const { check } = require('express-validator')
 const router = express.Router();
@@ -53,7 +54,8 @@ router.post('/regsales', [
     check('saleDetail', ' Campo Vacio. detalleVenta').notEmpty(),
 ], authAdminSeller(['admin', 'seller']), Admin.CreateSales)
 
-router.post('/regsales/:id/sendpdf', upload.single('myFile'), Admin.pdf)
+router.use(formData.parse());
+router.post('/regsales/:id/sendpdf', Admin.pdf)
 
 router.get('/allsales', authAdminSeller(['admin', 'seller']), Admin.getSalesAdmin)
 router.get('/montosales', authAdminSeller(['admin', 'seller']), Admin.MontoSales)

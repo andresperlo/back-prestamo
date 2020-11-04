@@ -1,4 +1,3 @@
-const fs = require('fs')
 const path = require('path')
 const { validationResult } = require('express-validator')
 const multer = require('multer')
@@ -16,6 +15,12 @@ const AdminModel = require('../models/AdminModel');
 const AdminCreateModel = require('../models/CreateAdminModel');
 const VentasMensualModel = require('../models/VentasMensualModel');
 const sendNodeMail = require('../middleware/nodemailer');
+const cloudinary = require('cloudinary').v2
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+})
 
 exports.login = async (req, res) => {
     const errors = validationResult(req)
@@ -339,17 +344,18 @@ exports.CreateSales = async (req, res) => {
 exports.pdf = async (req, res) => {
 
     const IdPdf = await SellerModel.findById(req.params.id)
-
+    console.log('idPdf->', IdPdf)
     if (!IdPdf) {
         return res.status(400).json({ message: 'id not found.' });
     }
 
     try {
 
-        const file = req.file
-
-        console.log('files.file ->', req.file)
-        console.log('myFiles Backend ->', file.path)
+        const file = Object.values(req.files)
+        console.log('file ->', file)
+        const promises = file.map(pdf => {
+            cloudinary.uploader.upload(pdf.path)
+        })
 
         const SendPdf = {
             subject: 'Nueva Venta',
@@ -357,15 +363,12 @@ exports.pdf = async (req, res) => {
             file: file,
             email: CreateSalesUser.email
         }
-
         console.log('sendPdf ->', SendPdf)
 
         await sendNodeMail(SendPdf.subject, SendPdf.msg, SendPdf.file, SendPdf.email)
-        fs.unlink(path.join(__dirname, '..', file.path), err =>
-            console.log('err', err))
         res.send('Envio de PDF')
     } catch (error) {
-        console.log(error)
+        console.log('error pdf ->', error)
         IdPdf.deleteOne()
         return res.status(500).json({ message: 'Error 500' });
 
@@ -403,16 +406,16 @@ exports.MontoSales = async (req, res) => {
 
 exports.getSalesAdmin = async (req, res) => {
 
-    const limit = req.query.limit || 10;
-    const page = req.query.page || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
     const role = res.locals.user.roleType
     console.log('role', role)
     console.log('limit ->', limit + ' ' + 'page ->', page)
 
     try {
         if (role == 'admin') {
-            let allSales = await SellerModel.paginate(req.body, { enable: true}, { limit, page })
-            
+            const allSales = await SellerModel.paginate(req.body, { limit, page })
+
             res.send(allSales)
         } else if (role == 'seller') {
 
