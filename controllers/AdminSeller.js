@@ -4,7 +4,7 @@ const multer = require('multer')
 let moment = require('moment'); // require
 moment.locale('es')
 const today = moment().format('DD/MM/YYYY');
-const month = moment().format('MM/YYYY');
+const month = moment().format('MMMM/YYYY');
 const exactMonth = moment().format('MMMM');
 const year = moment().format('YYYY');
 const mongoose = require('mongoose');
