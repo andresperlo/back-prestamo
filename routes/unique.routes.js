@@ -41,7 +41,7 @@ router.post('/regseller', [
 ], authAdmin('admin'), Admin.CreateSeller)
 
 router.post('/regsales', [
-    check('sellername', 'Campo Nombre del Vendedor Vacio').notEmpty(),
+    check('fullname', 'Campo Nombre del Vendedor Vacio').notEmpty(),
     check('creditLine', 'Campo lineaCredito Vació').notEmpty(),
     check('typeOperation', 'Ingresar un tipOperacion Correcto').notEmpty(),
     check('newClient', 'Campo clienteNuevo Vacio').notEmpty(),

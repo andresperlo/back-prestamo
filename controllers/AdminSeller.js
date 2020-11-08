@@ -164,14 +164,37 @@ exports.CreateSales = async (req, res) => {
     const { creditLine, typeOperation, newClient, nameClient, dniClient, celphoneClient,
         amountApproved, quotaAmount, feeAmount, saleDetail } = req.body
 
-    const sellerName = req.body.sellerName ? req.body.sellerName : res.locals.user.fullname
+    const sellerName = req.body.fullname ? req.body.fullname : res.locals.user.fullname
+    console.log('sellerName ', sellerName);
+
+    const AdminName = res.locals.user.fullname
+    console.log('AdminName ->', AdminName);
+
+    const fullname = sellerName ? sellerName : AdminName
+    console.log('nombre que llega por body: ', fullname);
+
+    let sellerExists = await AdminModel.findOne({ fullname });
+    let AdminExists = await AdminCreateModel.findOne({ fullname });
+    let idGral = []
+    console.log('sellerExist ->', sellerExists);
+    console.log('AdminExist ->', AdminExists);
+
+    if (sellerExists) {
+        let idSeller = sellerExists._id
+        idGral.push(idSeller)
+    } else if (AdminExists) {
+        let idAdmin = AdminExists._id
+        console.log('idAdmin ->', idAdmin);
+        idGral.push(idAdmin)
+    }
+
     const email = res.locals.user.email
     const userExists = await SellerModel.findOne({ dniClient });
-
+    console.log('dni cliente ->', userExists)
     if (!userExists) {
 
         CreateSalesUser = {
-            sellerName,
+            fullname,
             email,
             creditLine,
             typeOperation,
@@ -183,7 +206,7 @@ exports.CreateSales = async (req, res) => {
             quotaAmount,
             feeAmount,
             saleDetail,
-            seller: res.locals.user.id,
+            seller: idGral,
             date: today,
             month: month,
             exactMonth: exactMonth,
@@ -199,7 +222,7 @@ exports.CreateSales = async (req, res) => {
         } else {
 
             CreateSalesUser = {
-                sellerName,
+                fullname,
                 email,
                 creditLine,
                 typeOperation,
@@ -211,7 +234,7 @@ exports.CreateSales = async (req, res) => {
                 quotaAmount,
                 feeAmount,
                 saleDetail,
-                seller: res.locals.user.id,
+                seller: idGral,
                 date: today,
                 month: month,
                 exactMonth: exactMonth,
@@ -221,15 +244,18 @@ exports.CreateSales = async (req, res) => {
 
         }
     }
+    console.log('antes del venta total');
+    console.log('idSeller antes de venta', idGral);
+    console.log('year antes de ventas', year);
 
-    let ventaTotal = await VentasMensualModel.findOne({ seller: res.locals.user.id, year: year })
-
+    let ventaTotal = await VentasMensualModel.findOne({ seller: idGral, year: year })
+    console.log('ventaTotal ->', ventaTotal)
     try {
         const usuario = new SellerModel(CreateSalesUser)
-        await usuario.save();
+        /*  await usuario.save(); */
 
         if (!ventaTotal) {
-            ventaTotal = new VentasMensualModel({ seller: res.locals.user.id, year: year })
+            ventaTotal = new VentasMensualModel({ seller: idGral, year: year })
 
             if (CreateSalesUser.exactMonth == 'enero') {
                 ventaTotal.enero += CreateSalesUser.amountApproved
@@ -359,7 +385,7 @@ exports.pdf = async (req, res) => {
 
         const SendPdf = {
             subject: 'Nueva Venta',
-            msg: '¡Nueva Venta de ' + CreateSalesUser.sellerName + '!',
+            msg: '¡Nueva Venta de ' + CreateSalesUser.fullname + '!',
             file: file,
             email: CreateSalesUser.email
         }
@@ -386,7 +412,7 @@ exports.MontoSales = async (req, res) => {
 
             const allSales = await VentasMensualModel.find({ year: year }).select('-__v')
                 .populate('seller', 'fullname ')
-                .select(' -sellerName')
+                .select(' -fullname')
 
             res.send(allSales)
 
@@ -394,7 +420,7 @@ exports.MontoSales = async (req, res) => {
 
             const allSales = await VentasMensualModel.findOne({ seller: res.locals.user.id, year: year })
                 .populate('seller', 'fullname ')
-                .select(' -sellerName')
+                .select(' -fullname')
 
             console.log('allSales ->', allSales)
             res.send(allSales)
