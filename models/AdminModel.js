@@ -5,10 +5,11 @@ const AdminSchema = new mongoose.Schema({
     fullname:{
         type: String,
         trim: true,
-        required:true  
+        required:true,
+        uppercase: true
     },
     dni:{
-        type: Number,
+        type: String,
         trim: true,
         unique: true,
         required:true  
@@ -16,10 +17,11 @@ const AdminSchema = new mongoose.Schema({
     address:{
         type: String,
         trim: true,
-        required:true  
+        required:true, 
+        uppercase: true
     },
     celphone: {
-        type: Number,
+        type: String,
         required: true,
         trim: true,
     },
@@ -27,13 +29,15 @@ const AdminSchema = new mongoose.Schema({
         type: String,
         trim: true,
         required:true,
-        unique: true
+        unique: true,
+        uppercase: true
     },
     user:{
         type: String,
         trim: true,
         required:true,
-        unique: true
+        unique: true,
+        uppercase: true
     },
     password:{
         type: String,
@@ -43,10 +47,10 @@ const AdminSchema = new mongoose.Schema({
     roleType:{
         type: String,
         default: 'seller',
-        required:true  
+        required:true
     },
     enable:{
-        type: Boolean,
+        type: String,
         required:true,
         default: true
     },

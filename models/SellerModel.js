@@ -30,13 +30,13 @@ const SellerSchema = new mongoose.Schema({
         required: true
     },
     dniClient: {
-        type: Number,
+        type: String,
         trim: true,
         unique: true,
         required: true
     },
     celphoneClient: {
-        type: Number,
+        type: String,
         required: true,
         trim: true,
     },
@@ -46,12 +46,12 @@ const SellerSchema = new mongoose.Schema({
         trim: true
     },
     quotaAmount: {
-        type: Number,
+        type: String,
         required: true,
         trim: true
     },
     feeAmount: {
-        type: Number,
+        type: String,
         required: true,
         trim: true
     },
@@ -80,7 +80,7 @@ const SellerSchema = new mongoose.Schema({
         type: String
     },
     enable: {
-        type: Boolean,
+        type: String,
         required: true,
         default: true
     }

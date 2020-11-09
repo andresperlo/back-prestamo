@@ -472,14 +472,14 @@ exports.getSellerAdmin = async (req, res) => {
 
     try {
 
-        const seller = await AdminModel.find({ enable: true }).select('-token -password -__v -user -dni')
+        const seller = await AdminModel.paginate().select('-token -password -__v -user -dni')
 
         res.send(seller)
     } catch (err) {
         res.status(500).send(err);
     }
 }
-
+/* 
 exports.getSellerFalseAdmin = async (req, res) => {
 
     try {
@@ -490,7 +490,7 @@ exports.getSellerFalseAdmin = async (req, res) => {
     } catch (err) {
         res.status(500).send(err);
     }
-}
+} */
 
 exports.PutSales = async (req, res) => {
 
