@@ -41,7 +41,7 @@ const SellerSchema = new mongoose.Schema({
         trim: true,
     },
     amountApproved: {
-        type: Number,
+        type: String,
         required: true,
         trim: true
     },
