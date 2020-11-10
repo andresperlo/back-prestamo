@@ -1,4 +1,4 @@
-const multer = require('multer')
+/* const multer = require('multer')
 var storage = multer.diskStorage({
     destination: function (req, file, cb) {
       cb(null, 'images')
@@ -9,4 +9,4 @@ var storage = multer.diskStorage({
   })
    
    const upload = multer({ storage: storage })
-   module.exports = {upload}
+   module.exports = {upload} */

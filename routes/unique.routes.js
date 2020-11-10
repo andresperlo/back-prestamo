@@ -1,4 +1,5 @@
 const { upload } = require('../middleware/upload')
+const formData = require("express-form-data");
 const express = require('express');
 const { check } = require('express-validator')
 const router = express.Router();
@@ -40,7 +41,7 @@ router.post('/regseller', [
 ], authAdmin('admin'), Admin.CreateSeller)
 
 router.post('/regsales', [
-    check('sellername', 'Campo Nombre del Vendedor Vacio').notEmpty(),
+    check('fullname', 'Campo Nombre del Vendedor Vacio').notEmpty(),
     check('creditLine', 'Campo lineaCredito Vació').notEmpty(),
     check('typeOperation', 'Ingresar un tipOperacion Correcto').notEmpty(),
     check('newClient', 'Campo clienteNuevo Vacio').notEmpty(),
@@ -53,14 +54,15 @@ router.post('/regsales', [
     // check('saleDetail', ' Campo Vacio. detalleVenta').notEmpty(),
 ], authAdminSeller(['admin', 'seller']), Admin.CreateSales)
 
-router.post('/regsales/:id/sendpdf', upload.single('myFile'), Admin.pdf)
+router.use(formData.parse());
+router.post('/regsales/:id/sendpdf', Admin.pdf)
 
 router.get('/allsales', authAdminSeller(['admin', 'seller']), Admin.getSalesAdmin)
 router.get('/montosales', authAdminSeller(['admin', 'seller']), Admin.MontoSales)
 router.get('/allsalesfalse', authAdmin('admin'), Admin.getSalesFalseAdmin)
 
 router.get('/allseller', authAdmin('admin'), Admin.getSellerAdmin)
-router.get('/allsellerfalse', authAdmin('admin'), Admin.getSellerFalseAdmin)
+/* router.get('/allsellerfalse', authAdmin('admin'), Admin.getSellerFalseAdmin) */
 /* ventas */
 router.put('/salesupdate/:id', authAdmin('admin'), Admin.PutSales)
 router.put('/salesdisenable/:id', authAdmin('admin'), Admin.SalesDis)

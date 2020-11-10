@@ -4,7 +4,7 @@ const { paginate } = require('./AdminModel')
 
 const SellerSchema = new mongoose.Schema({
 
-    sellerName: {
+    fullname: {
         type: String,
         trim: true,
         required: true
@@ -20,7 +20,7 @@ const SellerSchema = new mongoose.Schema({
         required: true
     },
     newClient: {
-        type: Boolean,
+        type: String,
         trim: true,
         required: true
     },

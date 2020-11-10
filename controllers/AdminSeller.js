@@ -1,11 +1,10 @@
-const fs = require('fs')
 const path = require('path')
 const { validationResult } = require('express-validator')
 const multer = require('multer')
 let moment = require('moment'); // require
 moment.locale('es')
 const today = moment().format('DD/MM/YYYY');
-const month = moment().format('MM/YYYY');
+const month = moment().format('MMMM/YYYY');
 const exactMonth = moment().format('MMMM');
 const year = moment().format('YYYY');
 const mongoose = require('mongoose');
@@ -16,6 +15,12 @@ const AdminModel = require('../models/AdminModel');
 const AdminCreateModel = require('../models/CreateAdminModel');
 const VentasMensualModel = require('../models/VentasMensualModel');
 const sendNodeMail = require('../middleware/nodemailer');
+const cloudinary = require('cloudinary').v2
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET
+})
 
 exports.login = async (req, res) => {
     const errors = validationResult(req)
@@ -26,13 +31,14 @@ exports.login = async (req, res) => {
     const { body } = req
 
     const AdminLogin = await AdminCreateModel.findOne({ user: body.user })
+    console.log('Admin ->', AdminLogin)
     const SellerLogin = await AdminModel.findOne({ user: body.user });
+    console.log('Seller ->', SellerLogin)
 
-    if (!AdminLogin && !SellerLogin) {
+    if(!AdminLogin && !SellerLogin){
         return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos' });
     }
-    console.log('sellerlogin', SellerLogin)
-    console.log('adminLogin', AdminLogin)
+
 
     if (AdminLogin) {
         if (AdminLogin.enable !== "SI") {
@@ -46,9 +52,12 @@ exports.login = async (req, res) => {
         }
     }
 
+    
+
     const passCheck = SellerLogin ? await bcryptjs.compare(body.password, SellerLogin.password)
         :
         await bcryptjs.compare(body.password, AdminLogin.password)
+        console.log('password', passCheck)
     if (!passCheck) {
         return res.status(400).json({ mensaje: 'Usuario y/o CONTRASEÑA Incorrectos' })
     }
@@ -62,6 +71,8 @@ exports.login = async (req, res) => {
         }
     }
 
+    console.log('jwt ->', jwt_payload)
+
     try {
         const token = jsonwebtoken.sign(jwt_payload, process.env.JWT_SECRET, { expiresIn: process.env.TIME_EXP })
         if (AdminLogin) {
@@ -70,6 +81,7 @@ exports.login = async (req, res) => {
             res.send({ mensaje: 'Logueado Correctamente', token, role: AdminLogin.roleType, id: AdminLogin._id, fullname: AdminLogin.fullname })
         } else {
             SellerLogin.token = [token]
+            console.log('seller ->', SellerLogin)
             await AdminModel.update({ user: SellerLogin.user }, SellerLogin)
             res.send({ mensaje: 'Logueado Correctamente', token, role: SellerLogin.roleType, id: SellerLogin._id, fullname: SellerLogin.fullname })
         }
@@ -160,14 +172,37 @@ exports.CreateSales = async (req, res) => {
 
     let amountApproved = parseInt(req.body.amountApproved);
 
-    const sellerName = req.body.sellerName ? req.body.sellerName : res.locals.user.fullname
+    const sellerName = req.body.fullname ? req.body.fullname : res.locals.user.fullname
+    console.log('sellerName ', sellerName);
+
+    const AdminName = res.locals.user.fullname
+    console.log('AdminName ->', AdminName);
+
+    const fullname = sellerName ? sellerName : AdminName
+    console.log('nombre que llega por body: ', fullname);
+
+    let sellerExists = await AdminModel.findOne({ fullname });
+    let AdminExists = await AdminCreateModel.findOne({ fullname });
+    let idGral = []
+    console.log('sellerExist ->', sellerExists);
+    console.log('AdminExist ->', AdminExists);
+
+    if (sellerExists) {
+        let idSeller = sellerExists._id
+        idGral.push(idSeller)
+    } else if (AdminExists) {
+        let idAdmin = AdminExists._id
+        console.log('idAdmin ->', idAdmin);
+        idGral.push(idAdmin)
+    }
+
     const email = res.locals.user.email
     const userExists = await SellerModel.findOne({ dniClient });
-
+    console.log('dni cliente ->', userExists)
     if (!userExists) {
 
         CreateSalesUser = {
-            sellerName,
+            fullname,
             email,
             creditLine,
             typeOperation,
@@ -179,7 +214,7 @@ exports.CreateSales = async (req, res) => {
             quotaAmount,
             feeAmount,
             saleDetail,
-            seller: res.locals.user.id,
+            seller: idGral,
             date: today,
             month: month,
             exactMonth: exactMonth,
@@ -195,7 +230,7 @@ exports.CreateSales = async (req, res) => {
         } else {
 
             CreateSalesUser = {
-                sellerName,
+                fullname,
                 email,
                 creditLine,
                 typeOperation,
@@ -207,7 +242,7 @@ exports.CreateSales = async (req, res) => {
                 quotaAmount,
                 feeAmount,
                 saleDetail,
-                seller: res.locals.user.id,
+                seller: idGral,
                 date: today,
                 month: month,
                 exactMonth: exactMonth,
@@ -217,15 +252,18 @@ exports.CreateSales = async (req, res) => {
 
         }
     }
+    console.log('antes del venta total');
+    console.log('idSeller antes de venta', idGral);
+    console.log('year antes de ventas', year);
 
-    let ventaTotal = await VentasMensualModel.findOne({ seller: res.locals.user.id, year: year })
-
+    let ventaTotal = await VentasMensualModel.findOne({ seller: idGral, year: year })
+    console.log('ventaTotal ->', ventaTotal)
     try {
         const usuario = new SellerModel(CreateSalesUser)
-        await usuario.save();
+        /*  await usuario.save(); */
 
         if (!ventaTotal) {
-            ventaTotal = new VentasMensualModel({ seller: res.locals.user.id, year: year })
+            ventaTotal = new VentasMensualModel({ seller: idGral, year: year })
 
             if (CreateSalesUser.exactMonth == 'enero') {
                 ventaTotal.enero += CreateSalesUser.amountApproved
@@ -340,33 +378,31 @@ exports.CreateSales = async (req, res) => {
 exports.pdf = async (req, res) => {
 
     const IdPdf = await SellerModel.findById(req.params.id)
-
+    console.log('idPdf->', IdPdf)
     if (!IdPdf) {
         return res.status(400).json({ message: 'id not found.' });
     }
 
     try {
 
-        const file = req.file
-
-        console.log('files.file ->', req.file)
-        console.log('myFiles Backend ->', file.path)
+        const file = Object.values(req.files)
+        console.log('file ->', file)
+        const promises = file.map(pdf => {
+            cloudinary.uploader.upload(pdf.path)
+        })
 
         const SendPdf = {
             subject: 'Nueva Venta',
-            msg: '¡Nueva Venta de ' + CreateSalesUser.sellerName + '!',
+            msg: '¡Nueva Venta de ' + CreateSalesUser.fullname + '!',
             file: file,
             email: CreateSalesUser.email
         }
-
         console.log('sendPdf ->', SendPdf)
 
         await sendNodeMail(SendPdf.subject, SendPdf.msg, SendPdf.file, SendPdf.email)
-        fs.unlink(path.join(__dirname, '..', file.path), err =>
-            console.log('err', err))
         res.send('Envio de PDF')
     } catch (error) {
-        console.log(error)
+        console.log('error pdf ->', error)
         IdPdf.deleteOne()
         return res.status(500).json({ message: 'Error 500' });
 
@@ -384,17 +420,17 @@ exports.MontoSales = async (req, res) => {
 
             const allSales = await VentasMensualModel.find({ year: year }).select('-__v')
                 .populate('seller', 'fullname ')
-                .select(' -sellerName')
+                .select(' -fullname')
 
             res.send(allSales)
 
         } else if (role == 'seller') {
 
-            const allSales = await VentasMensualModel.findOne({ seller: res.locals.user.id, year: year})
+            const allSales = await VentasMensualModel.findOne({ seller: res.locals.user.id, year: year })
                 .populate('seller', 'fullname ')
-                .select(' -sellerName')
+                .select(' -fullname')
 
-                console.log('allSales ->', allSales)
+            console.log('allSales ->', allSales)
             res.send(allSales)
         }
     } catch (err) {
@@ -454,12 +490,11 @@ exports.getSalesAdmin = async (req, res) => {
 
             const allSales = await SellerModel.find({ seller: res.locals.user.id, enable: 'SI' })
                 .populate('seller', 'fullname ')
-                .select(' -sellerName')
 
             res.send(allSales)
         }
     } catch (err) {
-        console.log(err);
+        console.log('error paginate ->', err)
         res.status(500).send(err);
     }
 }
@@ -480,14 +515,14 @@ exports.getSellerAdmin = async (req, res) => {
 
     try {
 
-        const seller = await AdminModel.find({ enable: true }).select('-token -password -__v -user -dni')
+        const seller = await AdminModel.paginate().select('-token -password -__v -user -dni')
 
         res.send(seller)
     } catch (err) {
         res.status(500).send(err);
     }
 }
-
+/* 
 exports.getSellerFalseAdmin = async (req, res) => {
 
     try {
@@ -498,7 +533,7 @@ exports.getSellerFalseAdmin = async (req, res) => {
     } catch (err) {
         res.status(500).send(err);
     }
-}
+} */
 
 exports.PutSales = async (req, res) => {
 
