@@ -41,13 +41,13 @@ exports.login = async (req, res) => {
 
 
     if (AdminLogin) {
-        if (AdminLogin.enable !== 'si') {
+        if (AdminLogin.enable !== 'SI') {
             return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos' });
         }
     }
 
     if (SellerLogin) {
-        if (SellerLogin.enable !== 'si') {
+        if (SellerLogin.enable !== 'SI') {
             return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos' });
         }
     }
