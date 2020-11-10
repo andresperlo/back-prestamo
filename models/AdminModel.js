@@ -37,7 +37,7 @@ const AdminSchema = new mongoose.Schema({
         trim: true,
         required:true,
         unique: true,
-        uppercase: true
+        lowercase:true
     },
     password:{
         type: String,

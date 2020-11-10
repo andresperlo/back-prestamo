@@ -31,29 +31,33 @@ exports.login = async (req, res) => {
     const { body } = req
 
     const AdminLogin = await AdminCreateModel.findOne({ user: body.user })
+    console.log('Admin ->', AdminLogin)
     const SellerLogin = await AdminModel.findOne({ user: body.user });
+    console.log('Seller ->', SellerLogin)
 
-    if (!AdminLogin && !SellerLogin) {
+    if(!AdminLogin && !SellerLogin){
         return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos' });
     }
-    console.log('sellerlogin', SellerLogin)
-    console.log('adminLogin', AdminLogin)
+
 
     if (AdminLogin) {
-        if (AdminLogin.enable !== true) {
+        if (AdminLogin.enable !== 'si') {
             return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos' });
         }
     }
 
     if (SellerLogin) {
-        if (SellerLogin.enable !== true) {
+        if (SellerLogin.enable !== 'si') {
             return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos' });
         }
     }
 
+    
+
     const passCheck = SellerLogin ? await bcryptjs.compare(body.password, SellerLogin.password)
         :
         await bcryptjs.compare(body.password, AdminLogin.password)
+        console.log('password', passCheck)
     if (!passCheck) {
         return res.status(400).json({ mensaje: 'Usuario y/o CONTRASEÑA Incorrectos' })
     }
@@ -67,6 +71,8 @@ exports.login = async (req, res) => {
         }
     }
 
+    console.log('jwt ->', jwt_payload)
+
     try {
         const token = jsonwebtoken.sign(jwt_payload, process.env.JWT_SECRET, { expiresIn: process.env.TIME_EXP })
         if (AdminLogin) {
@@ -75,6 +81,7 @@ exports.login = async (req, res) => {
             res.send({ mensaje: 'Logueado Correctamente', token, role: AdminLogin.roleType, id: AdminLogin._id, fullname: AdminLogin.fullname })
         } else {
             SellerLogin.token = [token]
+            console.log('seller ->', SellerLogin)
             await AdminModel.update({ user: SellerLogin.user }, SellerLogin)
             res.send({ mensaje: 'Logueado Correctamente', token, role: SellerLogin.roleType, id: SellerLogin._id, fullname: SellerLogin.fullname })
         }

@@ -1,62 +1,62 @@
 const mongoose = require('mongoose')
 
 const AdminSchema = new mongoose.Schema({
-    
-    fullname:{
+
+    fullname: {
         type: String,
         trim: true,
-        required:true,
+        required: true,
         uppercase: true
     },
-    dni:{
+    dni: {
         type: String,
         trim: true,
         unique: true,
-        required:true  
+        required: true
     },
-    address:{
+    address: {
         type: String,
         trim: true,
-        required:true,
-        uppercase: true  
+        required: true,
+        uppercase: true
     },
     celphone: {
         type: String,
         required: true,
         trim: true
     },
-    email:{
+    email: {
         type: String,
         trim: true,
-        required:true,
+        required: true,
         unique: true,
         uppercase: true
     },
-    user:{
+    user: {
         type: String,
         trim: true,
-        required:true,
+        required: true,
         unique: true,
-        uppercase: true
+        lowercase:true
     },
-    password:{
+    password: {
         type: String,
-        required:true,
+        required: true,
         trim: true
     },
-    roleType:{
+    roleType: {
         type: String,
         default: 'admin',
-        required:true  
+        required: true
     },
-    enable:{
+    enable: {
         type: String,
-        required:true,
+        required: true,
         default: true
     },
     token: [String]
 })
- 
+
 const AdminModel = mongoose.model('Administradores', AdminSchema)
 
 module.exports = AdminModel;
