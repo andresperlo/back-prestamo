@@ -35,13 +35,13 @@ exports.login = async (req, res) => {
     console.log('adminLogin', AdminLogin)
 
     if (AdminLogin) {
-        if (AdminLogin.enable !== true) {
+        if (AdminLogin.enable !== "SI") {
             return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos Seller o Admin' });
         }
     }
 
     if (SellerLogin) {
-        if (SellerLogin.enable !== true) {
+        if (SellerLogin.enable !== "SI") {
             return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos Seller o Admin' });
         }
     }
@@ -156,8 +156,9 @@ exports.CreateSeller = async (req, res) => {
 
 exports.CreateSales = async (req, res) => {
 
-    const { creditLine, typeOperation, newClient, nameClient, dniClient, celphoneClient,
-        amountApproved, quotaAmount, feeAmount, saleDetail } = req.body
+    const { creditLine, typeOperation, newClient, nameClient, dniClient, celphoneClient, quotaAmount, feeAmount, saleDetail } = req.body
+
+    let amountApproved = parseInt(req.body.amountApproved);
 
     const sellerName = req.body.sellerName ? req.body.sellerName : res.locals.user.fullname
     const email = res.locals.user.email
@@ -403,27 +404,62 @@ exports.MontoSales = async (req, res) => {
 
 exports.getSalesAdmin = async (req, res) => {
 
-    const limit = req.query.limit || 10;
-    const page = req.query.page || 1;
+    // const limit = req.query.limit || 10;
+    // const page = req.query.page || 1;
+
+    const { limit, page, date="", nameClient="", dniClient="", celphoneClient="", sellerName="", creditLine="", quotaAmount="", feeAmount="", enable="", saleDetail=""} = req.query
 
     const role = res.locals.user.roleType
     console.log('role', role)
     console.log('limit ->', limit + ' ' + 'page ->', page)
+    console.log('Params ->', req.query)
     try {
         if (role == 'admin') {
 
-            const allSales = await SellerModel.paginate({enable: true}, { limit, page })
+            const allSales = await SellerModel.paginate({
+                nameClient: {
+                    $regex: nameClient
+                },
+                date: {
+                    $regex: date
+                },
+                dniClient: {
+                    $regex: dniClient
+                },
+                celphoneClient: {
+                    $regex: celphoneClient
+                },
+                sellerName: {
+                    $regex: sellerName
+                },
+                creditLine: {
+                    $regex: creditLine
+                },
+                quotaAmount: {
+                    $regex: quotaAmount
+                },
+                feeAmount: {
+                    $regex: feeAmount
+                },
+                saleDetail: {
+                    $regex: saleDetail
+                },
+                enable: {
+                    $regex: enable
+                }
+            }, { limit, page })
 
             res.send(allSales)
         } else if (role == 'seller') {
 
-            const allSales = await SellerModel.find({ seller: res.locals.user.id, enable: true })
+            const allSales = await SellerModel.find({ seller: res.locals.user.id, enable: 'SI' })
                 .populate('seller', 'fullname ')
                 .select(' -sellerName')
 
             res.send(allSales)
         }
     } catch (err) {
+        console.log(err);
         res.status(500).send(err);
     }
 }

@@ -33,7 +33,8 @@ const AdminSchema = new mongoose.Schema({
         type: String,
         trim: true,
         required:true,
-        unique: true
+        unique: true,
+        lowercase: true
     },
     password:{
         type: String,
@@ -46,9 +47,9 @@ const AdminSchema = new mongoose.Schema({
         required:true  
     },
     enable:{
-        type: Boolean,
+        type: String,
         required:true,
-        default: true
+        default: "SI"
     },
     token: [String]
 })
