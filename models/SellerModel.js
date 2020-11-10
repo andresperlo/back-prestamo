@@ -82,7 +82,7 @@ const SellerSchema = new mongoose.Schema({
     enable: {
         type: String,
         required: true,
-        default: true
+        default: 'SI'
     }
 })
 
