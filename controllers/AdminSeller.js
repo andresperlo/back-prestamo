@@ -169,16 +169,10 @@ exports.CreateSeller = async (req, res) => {
 
 exports.CreateSales = async (req, res) => {
 
-<<<<<<< HEAD
     const { creditLine, typeOperation, newClient, nameClient, dniClient, celphoneClient, quotaAmount, feeAmount, saleDetail } = req.body
 
     let amountApproved = parseInt(req.body.amountApproved);
-=======
-    const { creditLine, typeOperation, newClient, nameClient, dniClient, celphoneClient,
-         quotaAmount, feeAmount, saleDetail } = req.body
->>>>>>> e06f50a6f1960aeb815d065d96c40226b24217e0
 
-    const amountApproved = parseInt(req.body.amountApproved)
     const sellerName = req.body.fullname ? req.body.fullname : res.locals.user.fullname
     console.log('sellerName ', sellerName);
 
