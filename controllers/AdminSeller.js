@@ -169,10 +169,16 @@ exports.CreateSeller = async (req, res) => {
 
 exports.CreateSales = async (req, res) => {
 
+<<<<<<< HEAD
     const { creditLine, typeOperation, newClient, nameClient, dniClient, celphoneClient, quotaAmount, feeAmount, saleDetail } = req.body
 
     let amountApproved = parseInt(req.body.amountApproved);
+=======
+    const { creditLine, typeOperation, newClient, nameClient, dniClient, celphoneClient,
+         quotaAmount, feeAmount, saleDetail } = req.body
+>>>>>>> e06f50a6f1960aeb815d065d96c40226b24217e0
 
+    const amountApproved = parseInt(req.body.amountApproved)
     const sellerName = req.body.fullname ? req.body.fullname : res.locals.user.fullname
     console.log('sellerName ', sellerName);
 
@@ -448,6 +454,7 @@ exports.pdf = async (req, res) => {
 
     console.log(req.params.id);
     const IdPdf = await SellerModel.findById(req.params.id)
+    console.log('req.params.id ->', req.params.id)
     console.log('idPdf->', IdPdf)
     if (!IdPdf) {
         return res.status(400).json({ message: 'id not found.' });
@@ -473,7 +480,6 @@ exports.pdf = async (req, res) => {
         res.send('Envio de PDF')
     } catch (error) {
         console.log('error pdf ->', error)
-        IdPdf.deleteOne()
         return res.status(500).json({ message: 'Error 500' });
 
     }
