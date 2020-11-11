@@ -1,6 +1,5 @@
 const mongoose = require('mongoose')
 const Paginate = require('mongoose-paginate-v2')
-const { paginate } = require('./AdminModel')
 
 const SellerSchema = new mongoose.Schema({
 
@@ -64,13 +63,7 @@ const SellerSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'seller'
     },
-    typeClient: {
-        type: String
-    },
     date: {
-        type: String
-    },
-    month: {
         type: String
     },
     exactMonth: {

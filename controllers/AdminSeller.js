@@ -35,7 +35,7 @@ exports.login = async (req, res) => {
     const SellerLogin = await AdminModel.findOne({ user: body.user });
     console.log('Seller ->', SellerLogin)
 
-    if(!AdminLogin && !SellerLogin){
+    if (!AdminLogin && !SellerLogin) {
         return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos' });
     }
 
@@ -52,12 +52,12 @@ exports.login = async (req, res) => {
         }
     }
 
-    
+
 
     const passCheck = SellerLogin ? await bcryptjs.compare(body.password, SellerLogin.password)
         :
         await bcryptjs.compare(body.password, AdminLogin.password)
-        console.log('password', passCheck)
+    console.log('password', passCheck)
     if (!passCheck) {
         return res.status(400).json({ mensaje: 'Usuario y/o CONTRASEÑA Incorrectos' })
     }
@@ -160,7 +160,7 @@ exports.CreateSeller = async (req, res) => {
 
     try {
         await usuario.save();
-        res.send({ mensaje: 'Tu Usuario se Registro Correctamente', users })
+        res.send({ mensaje: 'Tu Usuario se Registro Correctamente', users, id: users._id })
     } catch (error) {
         res.status(500).send(error);
     }
@@ -169,7 +169,7 @@ exports.CreateSeller = async (req, res) => {
 exports.CreateSales = async (req, res) => {
 
     const { creditLine, typeOperation, newClient, nameClient, dniClient, celphoneClient,
-         quotaAmount, feeAmount, saleDetail } = req.body
+        quotaAmount, feeAmount, saleDetail } = req.body
 
     const amountApproved = parseInt(req.body.amountApproved)
     const sellerName = req.body.fullname ? req.body.fullname : res.locals.user.fullname
@@ -260,7 +260,7 @@ exports.CreateSales = async (req, res) => {
     console.log('ventaTotal ->', ventaTotal)
     try {
         const usuario = new SellerModel(CreateSalesUser)
-         await usuario.save();
+        await usuario.save();
 
         if (!ventaTotal) {
             ventaTotal = new VentasMensualModel({ seller: idGral, year: year })
@@ -374,7 +374,6 @@ exports.CreateSales = async (req, res) => {
     }
 }
 
-
 exports.pdf = async (req, res) => {
 
     const IdPdf = await SellerModel.findById(req.params.id)
@@ -440,20 +439,56 @@ exports.MontoSales = async (req, res) => {
 
 exports.getSalesAdmin = async (req, res) => {
 
-    const limit = parseInt(req.query.limit) || 10;
-    const page = parseInt(req.query.page) || 1;
+    const { limit, page, date = "", nameClient = "", dniClient = "", celphoneClient = "", fullname = "", creditLine = "", quotaAmount = "", feeAmount = "", enable = "", saleDetail = "", amountApproved = "" } = req.query
+
     const role = res.locals.user.roleType
     console.log('role', role)
     console.log('limit ->', limit + ' ' + 'page ->', page)
+    console.log('Params ->', req.query)
 
     try {
         if (role == 'admin') {
-            const allSales = await SellerModel.paginate(req.body, { limit, page })
+
+            const allSales = await SellerModel.paginate({
+                nameClient: {
+                    $regex: nameClient
+                },
+                date: {
+                    $regex: date
+                },
+                dniClient: {
+                    $regex: dniClient
+                },
+                celphoneClient: {
+                    $regex: celphoneClient
+                },
+                fullname: {
+                    $regex: fullname,
+                },
+                creditLine: {
+                    $regex: creditLine
+                },
+                quotaAmount: {
+                    $regex: quotaAmount
+                },
+                feeAmount: {
+                    $regex: feeAmount
+                },
+                saleDetail: {
+                    $regex: saleDetail
+                },
+                enable: {
+                    $regex: enable
+                },
+                amountApproved: {
+                    $regex: amountApproved,
+                }               
+            }, { limit, page, sort: { date: -1 } })
 
             res.send(allSales)
         } else if (role == 'seller') {
 
-            const allSales = await SellerModel.find({ seller: res.locals.user.id, enable: true })
+            const allSales = await SellerModel.find({ seller: res.locals.user.id, enable: 'SI' })
                 .populate('seller', 'fullname ')
 
             res.send(allSales)
