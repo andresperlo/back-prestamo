@@ -1,4 +1,3 @@
-const { upload } = require('../middleware/upload')
 const formData = require("express-form-data");
 const express = require('express');
 const { check } = require('express-validator')
@@ -51,7 +50,6 @@ router.post('/regsales', [
     check('amountApproved', 'Campo Vacio. montoAprobado').notEmpty(),
     check('quotaAmount', ' Campo Vacio. cantidadCuota').notEmpty(),
     check('feeAmount', ' Campo Vacio. montoCuota').notEmpty(),
-    // check('saleDetail', ' Campo Vacio. detalleVenta').notEmpty(),
 ], authAdminSeller(['admin', 'seller']), Admin.CreateSales)
 
 router.use(formData.parse());
@@ -59,7 +57,7 @@ router.post('/regsales/:id/sendpdf', Admin.pdf)
 
 router.get('/allsales', authAdminSeller(['admin', 'seller']), Admin.getSalesAdmin)
 router.get('/montosales', authAdminSeller(['admin', 'seller']), Admin.MontoSales)
-router.get('/allsalesfalse', authAdmin('admin'), Admin.getSalesFalseAdmin)
+// router.get('/allsalesfalse', authAdmin('admin'), Admin.getSalesFalseAdmin)
 
 router.get('/allseller', authAdmin('admin'), Admin.getSellerAdmin)
 /* router.get('/allsellerfalse', authAdmin('admin'), Admin.getSellerFalseAdmin) */

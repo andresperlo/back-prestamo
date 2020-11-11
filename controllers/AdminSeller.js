@@ -16,6 +16,7 @@ const AdminCreateModel = require('../models/CreateAdminModel');
 const VentasMensualModel = require('../models/VentasMensualModel');
 const sendNodeMail = require('../middleware/nodemailer');
 const cloudinary = require('cloudinary').v2
+
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -35,7 +36,7 @@ exports.login = async (req, res) => {
     const SellerLogin = await AdminModel.findOne({ user: body.user });
     console.log('Seller ->', SellerLogin)
 
-    if(!AdminLogin && !SellerLogin){
+    if (!AdminLogin && !SellerLogin) {
         return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos' });
     }
 
@@ -52,12 +53,12 @@ exports.login = async (req, res) => {
         }
     }
 
-    
+
 
     const passCheck = SellerLogin ? await bcryptjs.compare(body.password, SellerLogin.password)
         :
         await bcryptjs.compare(body.password, AdminLogin.password)
-        console.log('password', passCheck)
+    console.log('password', passCheck)
     if (!passCheck) {
         return res.status(400).json({ mensaje: 'Usuario y/o CONTRASEÑA Incorrectos' })
     }
@@ -257,10 +258,78 @@ exports.CreateSales = async (req, res) => {
     console.log('year antes de ventas', year);
 
     let ventaTotal = await VentasMensualModel.findOne({ seller: idGral, year: year })
+    // let ventaTotalSi = new VentasMensualModel({ seller: idGral, year: year })
+
+
     console.log('ventaTotal ->', ventaTotal)
     try {
         const usuario = new SellerModel(CreateSalesUser)
-        /*  await usuario.save(); */
+        await usuario.save();
+
+        // if (exactMonth == 'enero') {
+        //     !ventaTotal && 
+        //     (ventaTotal.enero = CreateSalesUser.amountApproved) && ventaTotal.save()
+        //     ventaTotal && (ventaTotal.enero += CreateSalesUser.amountApproved) && ventaTotal.save() 
+        // }
+        // if (exactMonth == 'febrero') {
+        //     !ventaTotal && 
+        //     (ventaTotal.febrero = CreateSalesUser.amountApproved) && ventaTotal.save()
+        //     ventaTotal && (ventaTotal.febrero += CreateSalesUser.amountApproved) && ventaTotal.save() 
+        // }
+
+        // if (exactMonth == 'marzo') {
+        //     !ventaTotal && 
+        //     (ventaTotal.marzo = CreateSalesUser.amountApproved) && ventaTotal.save()
+        //     ventaTotal && (ventaTotal.marzo += CreateSalesUser.amountApproved) && ventaTotal.save() 
+        // }
+        // if (exactMonth == 'abril') {
+        //     !ventaTotal && 
+        //     (ventaTotal.abril = CreateSalesUser.amountApproved) && ventaTotal.save()
+        //     ventaTotal && (ventaTotal.abril += CreateSalesUser.amountApproved) && ventaTotal.save() 
+        // }
+        // if (exactMonth == 'mayo') {
+        //     !ventaTotal && 
+        //     (ventaTotal.mayo = CreateSalesUser.amountApproved) && ventaTotal.save()
+        //     ventaTotal && (ventaTotal.mayo += CreateSalesUser.amountApproved) && ventaTotal.save() 
+        // }
+        // if (exactMonth == 'junio') {
+        //     !ventaTotal && 
+        //     (ventaTotal.junio = CreateSalesUser.amountApproved) && ventaTotal.save()
+        //     ventaTotal && (ventaTotal.junio += CreateSalesUser.amountApproved) && ventaTotal.save() 
+        // }
+        // if (exactMonth == 'julio') {
+        //     !ventaTotal && 
+        //     (ventaTotal.julio = CreateSalesUser.amountApproved) && ventaTotal.save()
+        //     ventaTotal && (ventaTotal.julio += CreateSalesUser.amountApproved) && ventaTotal.save() 
+        // }
+        // if (exactMonth == 'agosto') {
+        //     !ventaTotal && 
+        //     (ventaTotal.agosto = CreateSalesUser.amountApproved) && ventaTotal.save()
+        //     ventaTotal && (ventaTotal.agosto += CreateSalesUser.amountApproved) && ventaTotal.save() 
+        // }
+        // if (exactMonth == 'septiembre') {
+        //     !ventaTotal && 
+        //     (ventaTotal.septiembre = CreateSalesUser.amountApproved) && ventaTotal.save()
+        //     ventaTotal && (ventaTotal.septiembre += CreateSalesUser.amountApproved) && ventaTotal.save() 
+        // }
+        // if (exactMonth == 'octubre') {
+        //     !ventaTotal && 
+        //     (ventaTotal.octubre = CreateSalesUser.amountApproved) && ventaTotal.save()
+        //     ventaTotal && (ventaTotal.octubre += CreateSalesUser.amountApproved) && ventaTotal.save() 
+        // }
+        // if (exactMonth == 'noviembre') {
+        //     !ventaTotal && 
+        //     (ventaTotal.noviembre = CreateSalesUser.amountApproved) && ventaTotal.save() 
+        //     ventaTotal && (ventaTotal.noviembre += CreateSalesUser.amountApproved) && ventaTotal.save() 
+        // }
+        // if (exactMonth == 'diciembre') {
+        //     !ventaTotal && 
+        //     (ventaTotal.diciembre = CreateSalesUser.amountApproved) && ventaTotal.save()
+        //     ventaTotal && (ventaTotal.diciembre += CreateSalesUser.amountApproved) && ventaTotal.save() 
+        // }
+        // !ventaTotal && (ventaTotal.annualAmountApproved = CreateSalesUser.amountApproved)
+        // ventaTotal && (ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved)
+
 
         if (!ventaTotal) {
             ventaTotal = new VentasMensualModel({ seller: idGral, year: year })
@@ -377,6 +446,7 @@ exports.CreateSales = async (req, res) => {
 
 exports.pdf = async (req, res) => {
 
+    console.log(req.params.id);
     const IdPdf = await SellerModel.findById(req.params.id)
     console.log('idPdf->', IdPdf)
     if (!IdPdf) {
@@ -440,15 +510,13 @@ exports.MontoSales = async (req, res) => {
 
 exports.getSalesAdmin = async (req, res) => {
 
-    // const limit = req.query.limit || 10;
-    // const page = req.query.page || 1;
-
-    const { limit, page, date="", nameClient="", dniClient="", celphoneClient="", sellerName="", creditLine="", quotaAmount="", feeAmount="", enable="", saleDetail=""} = req.query
+    const { limit, page, date = "", nameClient = "", dniClient = "", celphoneClient = "", fullname = "", creditLine = "", quotaAmount = "", feeAmount = "", enable = "", saleDetail = "", amountApproved = "" } = req.query
 
     const role = res.locals.user.roleType
     console.log('role', role)
     console.log('limit ->', limit + ' ' + 'page ->', page)
     console.log('Params ->', req.query)
+
     try {
         if (role == 'admin') {
 
@@ -465,8 +533,8 @@ exports.getSalesAdmin = async (req, res) => {
                 celphoneClient: {
                     $regex: celphoneClient
                 },
-                sellerName: {
-                    $regex: sellerName
+                fullname: {
+                    $regex: fullname,
                 },
                 creditLine: {
                     $regex: creditLine
@@ -482,8 +550,11 @@ exports.getSalesAdmin = async (req, res) => {
                 },
                 enable: {
                     $regex: enable
-                }
-            }, { limit, page })
+                },
+                amountApproved: {
+                    $regex: amountApproved,
+                }               
+            }, { limit, page, sort: { date: -1 } })
 
             res.send(allSales)
         } else if (role == 'seller') {
@@ -515,10 +586,11 @@ exports.getSellerAdmin = async (req, res) => {
 
     try {
 
-        const seller = await AdminModel.paginate().select('-token -password -__v -user -dni')
+        const seller = await AdminModel.paginate()
 
         res.send(seller)
     } catch (err) {
+        console.log(err);
         res.status(500).send(err);
     }
 }

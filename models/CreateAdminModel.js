@@ -35,15 +35,9 @@ const AdminSchema = new mongoose.Schema({
     user: {
         type: String,
         trim: true,
-<<<<<<< HEAD
         required:true,
         unique: true,
         lowercase: true
-=======
-        required: true,
-        unique: true,
-        lowercase:true
->>>>>>> 838a9eaa9a40324e5758a242266c0505c91f8fbb
     },
     password: {
         type: String,
@@ -55,17 +49,10 @@ const AdminSchema = new mongoose.Schema({
         default: 'admin',
         required: true
     },
-<<<<<<< HEAD
-    enable:{
-        type: String,
-        required:true,
-        default: "SI"
-=======
     enable: {
         type: String,
         required: true,
-        default: 'SI'
->>>>>>> 838a9eaa9a40324e5758a242266c0505c91f8fbb
+        default: "SI"
     },
     token: [String]
 })
