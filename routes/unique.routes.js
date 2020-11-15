@@ -1,4 +1,3 @@
-const { upload } = require('../middleware/upload')
 const formData = require("express-form-data");
 const express = require('express');
 const { check } = require('express-validator')
@@ -62,7 +61,6 @@ router.get('/montosales', authAdminSeller(['admin', 'seller']), Admin.MontoSales
 router.get('/allsalesfalse', authAdmin('admin'), Admin.getSalesFalseAdmin)
 
 router.get('/allseller', authAdmin('admin'), Admin.getSellerAdmin)
-/* router.get('/allsellerfalse', authAdmin('admin'), Admin.getSellerFalseAdmin) */
 /* ventas */
 router.put('/salesupdate/:id', authAdmin('admin'), Admin.PutSales)
 router.put('/salesdisenable/:id', authAdmin('admin'), Admin.SalesDis)

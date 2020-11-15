@@ -2,10 +2,7 @@ const mongoose = require('mongoose')
 
 const VentasSchema = new mongoose.Schema({
 
-    seller: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'seller'
-    },
+  
     enero: {
         type: Number,
         required: true,
@@ -86,6 +83,10 @@ const VentasSchema = new mongoose.Schema({
         required: true,
         trim: true,
         default: 0
+    },
+    seller: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'seller'
     },
 })
 

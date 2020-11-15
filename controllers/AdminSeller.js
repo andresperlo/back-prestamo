@@ -6,7 +6,7 @@ moment.locale('es')
 const today = moment().format('DD/MM/YYYY');
 const month = moment().format('MMMM/YYYY');
 const exactMonth = moment().format('MMMM');
-const year = moment().format('YYYY');
+const year =  moment().format('YYYY');
 const mongoose = require('mongoose');
 const bcryptjs = require('bcryptjs')
 const jsonwebtoken = require('jsonwebtoken')
@@ -15,6 +15,7 @@ const AdminModel = require('../models/AdminModel');
 const AdminCreateModel = require('../models/CreateAdminModel');
 const VentasMensualModel = require('../models/VentasMensualModel');
 const sendNodeMail = require('../middleware/nodemailer');
+const { parseTwoDigitYear } = require('moment');
 const cloudinary = require('cloudinary').v2
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -257,14 +258,25 @@ exports.CreateSales = async (req, res) => {
     console.log('year antes de ventas', year);
 
     let ventaTotal = await VentasMensualModel.findOne({ seller: idGral, year: year })
-    console.log('ventaTotal ->', ventaTotal)
+    
     try {
         const usuario = new SellerModel(CreateSalesUser)
         await usuario.save();
-
         if (!ventaTotal) {
+
+            console.log('año ->', year)
             ventaTotal = new VentasMensualModel({ seller: idGral, year: year })
 
+            let vendedor = await AdminModel.findOne({fullname})
+            let id = ventaTotal._id
+            let saleFound = vendedor.sales.find( sale => sale === id )
+
+            if(!saleFound){
+                vendedor.sales.push(id)
+               await vendedor.save()
+            }
+           
+            console.log('vendedorNew ->', vendedor)
             if (CreateSalesUser.exactMonth == 'enero') {
                 ventaTotal.enero += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
@@ -417,10 +429,10 @@ exports.MontoSales = async (req, res) => {
     try {
         if (role == 'admin') {
 
-            const allSales = await VentasMensualModel.find({ year: year }).select('-__v')
+            const allSales = await VentasMensualModel.find({})
                 .populate('seller', 'fullname ')
-                .select(' -fullname')
-
+            const vendedor = await AdminModel.find({ seller: allSales.seller })
+            console.log('vendedor', vendedor)
             res.send(allSales)
 
         } else if (role == 'seller') {
@@ -482,7 +494,7 @@ exports.getSalesAdmin = async (req, res) => {
                 },
                 amountApproved: {
                     $regex: amountApproved,
-                }               
+                }
             }, { limit, page, sort: { date: -1 } })
 
             res.send(allSales)
@@ -515,25 +527,13 @@ exports.getSellerAdmin = async (req, res) => {
 
     try {
 
-        const seller = await AdminModel.paginate().select('-token -password -__v -user -dni')
+        const seller = await AdminModel.find({}).populate('sales')
 
         res.send(seller)
     } catch (err) {
         res.status(500).send(err);
     }
 }
-/* 
-exports.getSellerFalseAdmin = async (req, res) => {
-
-    try {
-
-        const seller = await AdminModel.find({ enable: false }).select('-token -password -__v -user -dni')
-
-        res.send(seller)
-    } catch (err) {
-        res.status(500).send(err);
-    }
-} */
 
 exports.PutSales = async (req, res) => {
 
