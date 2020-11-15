@@ -6,7 +6,7 @@ moment.locale('es')
 const today = moment().format('DD/MM/YYYY');
 const month = moment().format('MMMM/YYYY');
 const exactMonth = moment().format('MMMM');
-const year = moment().format('YYYY');
+const year =  moment().format('YYYY');
 const mongoose = require('mongoose');
 const bcryptjs = require('bcryptjs')
 const jsonwebtoken = require('jsonwebtoken')
@@ -15,6 +15,7 @@ const AdminModel = require('../models/AdminModel');
 const AdminCreateModel = require('../models/CreateAdminModel');
 const VentasMensualModel = require('../models/VentasMensualModel');
 const sendNodeMail = require('../middleware/nodemailer');
+const { parseTwoDigitYear } = require('moment');
 const cloudinary = require('cloudinary').v2
 
 cloudinary.config({
@@ -161,7 +162,7 @@ exports.CreateSeller = async (req, res) => {
 
     try {
         await usuario.save();
-        res.send({ mensaje: 'Tu Usuario se Registro Correctamente', users })
+        res.send({ mensaje: 'Tu Usuario se Registro Correctamente', users, id: users._id })
     } catch (error) {
         res.status(500).send(error);
     }
@@ -258,82 +259,25 @@ exports.CreateSales = async (req, res) => {
     console.log('year antes de ventas', year);
 
     let ventaTotal = await VentasMensualModel.findOne({ seller: idGral, year: year })
-    // let ventaTotalSi = new VentasMensualModel({ seller: idGral, year: year })
-
-
-    console.log('ventaTotal ->', ventaTotal)
+    
     try {
         const usuario = new SellerModel(CreateSalesUser)
         await usuario.save();
-
-        // if (exactMonth == 'enero') {
-        //     !ventaTotal && 
-        //     (ventaTotal.enero = CreateSalesUser.amountApproved) && ventaTotal.save()
-        //     ventaTotal && (ventaTotal.enero += CreateSalesUser.amountApproved) && ventaTotal.save() 
-        // }
-        // if (exactMonth == 'febrero') {
-        //     !ventaTotal && 
-        //     (ventaTotal.febrero = CreateSalesUser.amountApproved) && ventaTotal.save()
-        //     ventaTotal && (ventaTotal.febrero += CreateSalesUser.amountApproved) && ventaTotal.save() 
-        // }
-
-        // if (exactMonth == 'marzo') {
-        //     !ventaTotal && 
-        //     (ventaTotal.marzo = CreateSalesUser.amountApproved) && ventaTotal.save()
-        //     ventaTotal && (ventaTotal.marzo += CreateSalesUser.amountApproved) && ventaTotal.save() 
-        // }
-        // if (exactMonth == 'abril') {
-        //     !ventaTotal && 
-        //     (ventaTotal.abril = CreateSalesUser.amountApproved) && ventaTotal.save()
-        //     ventaTotal && (ventaTotal.abril += CreateSalesUser.amountApproved) && ventaTotal.save() 
-        // }
-        // if (exactMonth == 'mayo') {
-        //     !ventaTotal && 
-        //     (ventaTotal.mayo = CreateSalesUser.amountApproved) && ventaTotal.save()
-        //     ventaTotal && (ventaTotal.mayo += CreateSalesUser.amountApproved) && ventaTotal.save() 
-        // }
-        // if (exactMonth == 'junio') {
-        //     !ventaTotal && 
-        //     (ventaTotal.junio = CreateSalesUser.amountApproved) && ventaTotal.save()
-        //     ventaTotal && (ventaTotal.junio += CreateSalesUser.amountApproved) && ventaTotal.save() 
-        // }
-        // if (exactMonth == 'julio') {
-        //     !ventaTotal && 
-        //     (ventaTotal.julio = CreateSalesUser.amountApproved) && ventaTotal.save()
-        //     ventaTotal && (ventaTotal.julio += CreateSalesUser.amountApproved) && ventaTotal.save() 
-        // }
-        // if (exactMonth == 'agosto') {
-        //     !ventaTotal && 
-        //     (ventaTotal.agosto = CreateSalesUser.amountApproved) && ventaTotal.save()
-        //     ventaTotal && (ventaTotal.agosto += CreateSalesUser.amountApproved) && ventaTotal.save() 
-        // }
-        // if (exactMonth == 'septiembre') {
-        //     !ventaTotal && 
-        //     (ventaTotal.septiembre = CreateSalesUser.amountApproved) && ventaTotal.save()
-        //     ventaTotal && (ventaTotal.septiembre += CreateSalesUser.amountApproved) && ventaTotal.save() 
-        // }
-        // if (exactMonth == 'octubre') {
-        //     !ventaTotal && 
-        //     (ventaTotal.octubre = CreateSalesUser.amountApproved) && ventaTotal.save()
-        //     ventaTotal && (ventaTotal.octubre += CreateSalesUser.amountApproved) && ventaTotal.save() 
-        // }
-        // if (exactMonth == 'noviembre') {
-        //     !ventaTotal && 
-        //     (ventaTotal.noviembre = CreateSalesUser.amountApproved) && ventaTotal.save() 
-        //     ventaTotal && (ventaTotal.noviembre += CreateSalesUser.amountApproved) && ventaTotal.save() 
-        // }
-        // if (exactMonth == 'diciembre') {
-        //     !ventaTotal && 
-        //     (ventaTotal.diciembre = CreateSalesUser.amountApproved) && ventaTotal.save()
-        //     ventaTotal && (ventaTotal.diciembre += CreateSalesUser.amountApproved) && ventaTotal.save() 
-        // }
-        // !ventaTotal && (ventaTotal.annualAmountApproved = CreateSalesUser.amountApproved)
-        // ventaTotal && (ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved)
-
-
         if (!ventaTotal) {
+
+            console.log('año ->', year)
             ventaTotal = new VentasMensualModel({ seller: idGral, year: year })
 
+            let vendedor = await AdminModel.findOne({fullname})
+            let id = ventaTotal._id
+            let saleFound = vendedor.sales.find( sale => sale === id )
+
+            if(!saleFound){
+                vendedor.sales.push(id)
+               await vendedor.save()
+            }
+           
+            console.log('vendedorNew ->', vendedor)
             if (CreateSalesUser.exactMonth == 'enero') {
                 ventaTotal.enero += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
@@ -443,7 +387,6 @@ exports.CreateSales = async (req, res) => {
     }
 }
 
-
 exports.pdf = async (req, res) => {
 
     console.log(req.params.id);
@@ -488,10 +431,10 @@ exports.MontoSales = async (req, res) => {
     try {
         if (role == 'admin') {
 
-            const allSales = await VentasMensualModel.find({ year: year }).select('-__v')
+            const allSales = await VentasMensualModel.find({})
                 .populate('seller', 'fullname ')
-                .select(' -fullname')
-
+            const vendedor = await AdminModel.find({ seller: allSales.seller })
+            console.log('vendedor', vendedor)
             res.send(allSales)
 
         } else if (role == 'seller') {
@@ -553,7 +496,7 @@ exports.getSalesAdmin = async (req, res) => {
                 },
                 amountApproved: {
                     $regex: amountApproved,
-                }               
+                }
             }, { limit, page, sort: { date: -1 } })
 
             res.send(allSales)
@@ -586,7 +529,7 @@ exports.getSellerAdmin = async (req, res) => {
 
     try {
 
-        const seller = await AdminModel.paginate()
+        const seller = await AdminModel.find({}).populate('sales')
 
         res.send(seller)
     } catch (err) {
@@ -594,18 +537,6 @@ exports.getSellerAdmin = async (req, res) => {
         res.status(500).send(err);
     }
 }
-/* 
-exports.getSellerFalseAdmin = async (req, res) => {
-
-    try {
-
-        const seller = await AdminModel.find({ enable: false }).select('-token -password -__v -user -dni')
-
-        res.send(seller)
-    } catch (err) {
-        res.status(500).send(err);
-    }
-} */
 
 exports.PutSales = async (req, res) => {
 

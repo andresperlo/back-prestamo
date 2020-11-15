@@ -2,8 +2,7 @@ const mongoose = require('mongoose');
 const Paginate = require('mongoose-paginate-v2')
 // let aggregatePaginate = require('mongoose-aggregate-paginate-v2');
 
-const AdminSchema = new mongoose.Schema({
-    
+const AdminSchema = new mongoose.Schema({  
     fullname:{
         type: String,
         trim: true,
@@ -56,7 +55,12 @@ const AdminSchema = new mongoose.Schema({
         required: true,
         default: "SI"
     },
-    token: [String]
+    token: [String],
+    
+    sales:[{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'montotal'
+    }],
 })
 
 AdminSchema.plugin(Paginate)

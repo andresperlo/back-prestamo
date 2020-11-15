@@ -1,6 +1,5 @@
 const mongoose = require('mongoose')
-const Paginate = require('mongoose-paginate-v2');
-// let aggregatePaginate = require('mongoose-aggregate-paginate-v2');
+const Paginate = require('mongoose-paginate-v2')
 
 const SellerSchema = new mongoose.Schema({
 
@@ -63,15 +62,9 @@ const SellerSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'seller'
     },
-    // typeClient: {
-    //     type: String
-    // },
     date: {
         type: String
     },
-    // month: {
-    //     type: String
-    // },
     exactMonth: {
         type: String
     },
