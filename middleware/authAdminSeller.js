@@ -6,7 +6,6 @@ module.exports = (role) => async (req, res, next) => {
 
     try {
 
-        console.log('entra en AdmimLogout')
         const token = req.header('Authorization').replace('Bearer ', '');
         const verificar = jsonwebtoken.verify(token, process.env.JWT_SECRET);
         
@@ -24,14 +23,12 @@ module.exports = (role) => async (req, res, next) => {
         }
         res.locals.user = AdminLogin ? AdminLogin : SellerLogin,
         res.locals.token = token;
-        
-        console.log('El Roles es Admin o Seller? ->',res.locals.user.roleType)
-        
+                
         next();
     }
  
     catch (error) {
-        console.log('error de authLogout ->', error)
+        console.log(error)
         return res.status(401).json({ mensaje: 'Fuera: No Autorizado', error: error.message })
     }
 }

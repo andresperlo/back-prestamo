@@ -12,7 +12,6 @@ router.post('/login', [
     check('password', ' Campo Vacio. Contraseña').notEmpty(),
     check('password', 'la contraseña debe tener un mínimo de 8 caracteres').isLength({ min: 8 })
 ], Admin.login)
-
 router.post('/regadmin', [
     check('fullname', 'Campo Nombre del Vendedor Vacio').notEmpty(),
     check('dni', 'Ingresar un dni Correcto').notEmpty(),
@@ -25,7 +24,6 @@ router.post('/regadmin', [
     check('password', ' Campo Vacio. Contraseña').notEmpty(),
     check('password', 'la contraseña debe tener un mínimo de 8 caracteres').isLength({ min: 8 })
 ], authAdmin('admin'), Admin.CreateAdmin)
-
 router.post('/regseller', [
     check('fullname', 'Campo Nombre del Vendedor Vacio').notEmpty(),
     check('dni', 'Ingresar un dni Correcto').notEmpty(),
@@ -38,7 +36,6 @@ router.post('/regseller', [
     check('password', ' Campo Vacio. Contraseña').notEmpty(),
     check('password', 'la contraseña debe tener un mínimo de 8 caracteres').isLength({ min: 8 })
 ], authAdmin('admin'), Admin.CreateSeller)
-
 router.post('/regsales', [
     check('fullname', 'Campo Nombre del Vendedor Vacio').notEmpty(),
     check('creditLine', 'Campo lineaCredito Vació').notEmpty(),
@@ -51,25 +48,17 @@ router.post('/regsales', [
     check('quotaAmount', ' Campo Vacio. cantidadCuota').notEmpty(),
     check('feeAmount', ' Campo Vacio. montoCuota').notEmpty(),
 ], authAdminSeller(['admin', 'seller']), Admin.CreateSales)
-
 router.use(formData.parse());
 router.post('/regsales/:id/sendpdf', Admin.pdf)
-
 router.get('/allsales', authAdminSeller(['admin', 'seller']), Admin.getSalesAdmin)
 router.get('/montosales', authAdminSeller(['admin', 'seller']), Admin.MontoSales)
-// router.get('/allsalesfalse', authAdmin('admin'), Admin.getSalesFalseAdmin)
-
 router.get('/allseller', authAdmin('admin'), Admin.getSellerAdmin)
-/* router.get('/allsellerfalse', authAdmin('admin'), Admin.getSellerFalseAdmin) */
-/* ventas */
 router.put('/salesupdate/:id', authAdmin('admin'), Admin.PutSales)
 router.put('/salesdisenable/:id', authAdmin('admin'), Admin.SalesDis)
 router.put('/salesenable/:id', authAdmin('admin'), Admin.SalesEn)
-/* vendedores */
 router.put('/sellerupdate/:id', authAdmin('admin'), Admin.PutSeller)
 router.put('/sellerdisenable/:id', authAdmin('admin'), Admin.SellerDis)
 router.put('/sellerenable/:id', authAdmin('admin'), Admin.SellerEn)
-
 router.get('/logout', authAdminSeller(['admin', 'seller']), Admin.Logout)
 
 module.exports = router;

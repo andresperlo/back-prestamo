@@ -1,7 +1,5 @@
-const path = require('path')
 const { validationResult } = require('express-validator')
-const multer = require('multer')
-let moment = require('moment'); // require
+let moment = require('moment');
 moment.locale('es')
 const today = moment().format('DD/MM/YYYY');
 const month = moment().format('MMMM/YYYY');
@@ -33,14 +31,11 @@ exports.login = async (req, res) => {
     const { body } = req
 
     const AdminLogin = await AdminCreateModel.findOne({ user: body.user })
-    console.log('Admin ->', AdminLogin)
     const SellerLogin = await AdminModel.findOne({ user: body.user });
-    console.log('Seller ->', SellerLogin)
 
     if (!AdminLogin && !SellerLogin) {
         return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos' });
     }
-
 
     if (AdminLogin) {
         if (AdminLogin.enable !== "SI") {
@@ -54,12 +49,10 @@ exports.login = async (req, res) => {
         }
     }
 
-
-
     const passCheck = SellerLogin ? await bcryptjs.compare(body.password, SellerLogin.password)
         :
         await bcryptjs.compare(body.password, AdminLogin.password)
-    console.log('password', passCheck)
+
     if (!passCheck) {
         return res.status(400).json({ mensaje: 'Usuario y/o CONTRASEÑA Incorrectos' })
     }
@@ -73,8 +66,6 @@ exports.login = async (req, res) => {
         }
     }
 
-    console.log('jwt ->', jwt_payload)
-
     try {
         const token = jsonwebtoken.sign(jwt_payload, process.env.JWT_SECRET, { expiresIn: process.env.TIME_EXP })
         if (AdminLogin) {
@@ -83,13 +74,12 @@ exports.login = async (req, res) => {
             res.send({ mensaje: 'Logueado Correctamente', token, role: AdminLogin.roleType, id: AdminLogin._id, fullname: AdminLogin.fullname })
         } else {
             SellerLogin.token = [token]
-            console.log('seller ->', SellerLogin)
             await AdminModel.update({ user: SellerLogin.user }, SellerLogin)
             res.send({ mensaje: 'Logueado Correctamente', token, role: SellerLogin.roleType, id: SellerLogin._id, fullname: SellerLogin.fullname })
         }
-        console.log('token ->', token)
 
     } catch (error) {
+        console.log('error')
         return res.status(500).json({ mensaje: 'ERROR', error })
     }
 }
@@ -127,6 +117,7 @@ exports.CreateAdmin = async (req, res) => {
         await usuario.save();
         res.send({ mensaje: 'Tu Administrador se Registro Correctamente', admin })
     } catch (error) {
+        console.log(error);
         res.status(500).send(error);
     }
 }
@@ -173,34 +164,24 @@ exports.CreateSales = async (req, res) => {
     const { creditLine, typeOperation, newClient, nameClient, dniClient, celphoneClient, quotaAmount, feeAmount, saleDetail } = req.body
 
     let amountApproved = parseInt(req.body.amountApproved);
-
     const sellerName = req.body.fullname ? req.body.fullname : res.locals.user.fullname
-    console.log('sellerName ', sellerName);
-
     const AdminName = res.locals.user.fullname
-    console.log('AdminName ->', AdminName);
-
     const fullname = sellerName ? sellerName : AdminName
-    console.log('nombre que llega por body: ', fullname);
-
     let sellerExists = await AdminModel.findOne({ fullname });
     let AdminExists = await AdminCreateModel.findOne({ fullname });
     let idGral = []
-    console.log('sellerExist ->', sellerExists);
-    console.log('AdminExist ->', AdminExists);
 
     if (sellerExists) {
         let idSeller = sellerExists._id
         idGral.push(idSeller)
     } else if (AdminExists) {
         let idAdmin = AdminExists._id
-        console.log('idAdmin ->', idAdmin);
         idGral.push(idAdmin)
     }
 
     const email = res.locals.user.email
     const userExists = await SellerModel.findOne({ dniClient });
-    console.log('dni cliente ->', userExists)
+
     if (!userExists) {
 
         CreateSalesUser = {
@@ -226,7 +207,6 @@ exports.CreateSales = async (req, res) => {
     }
 
     if (userExists) {
-        console.log('userExist ->', userExists)
         if (userExists.quotaAmount > 3) {
             return res.status(400).json({ mensaje: 'No puede tener el prestamo. Cuota mayor a 3' })
         } else {
@@ -254,9 +234,6 @@ exports.CreateSales = async (req, res) => {
 
         }
     }
-    console.log('antes del venta total');
-    console.log('idSeller antes de venta', idGral);
-    console.log('year antes de ventas', year);
 
     let ventaTotal = await VentasMensualModel.findOne({ seller: idGral, year: year })
 
@@ -265,17 +242,7 @@ exports.CreateSales = async (req, res) => {
         await usuario.save();
         if (!ventaTotal) {
 
-            console.log('año ->', year)
             ventaTotal = new VentasMensualModel({ seller: idGral, year: year })
-
-            let vendedor = await AdminModel.findOne({ fullname })
-            let id = ventaTotal._id
-            let saleFound = vendedor.sales.find(sale => sale === id)
-
-            if (!saleFound) {
-                vendedor.sales.push(id)
-                await vendedor.save()
-            }
 
             if (CreateSalesUser.exactMonth == 'enero') {
                 ventaTotal.enero += CreateSalesUser.amountApproved
@@ -381,17 +348,15 @@ exports.CreateSales = async (req, res) => {
 
         res.send({ mensaje: 'Venta Cargada Correctamente', CreateSalesUser, id: usuario._id })
     } catch (error) {
-        console.log('error de regsales ->', error)
+        console.log(error)
         res.status(500).send(error);
     }
 }
 
 exports.pdf = async (req, res) => {
 
-    console.log(req.params.id);
     const IdPdf = await SellerModel.findById(req.params.id)
-    console.log('req.params.id ->', req.params.id)
-    console.log('idPdf->', IdPdf)
+
     if (!IdPdf) {
         return res.status(400).json({ message: 'id not found.' });
     }
@@ -399,7 +364,6 @@ exports.pdf = async (req, res) => {
     try {
 
         const file = Object.values(req.files)
-        console.log('file ->', file)
         const promises = file.map(pdf => {
             cloudinary.uploader.upload(pdf.path)
         })
@@ -410,12 +374,11 @@ exports.pdf = async (req, res) => {
             file: file,
             email: CreateSalesUser.email
         }
-        console.log('sendPdf ->', SendPdf)
 
         await sendNodeMail(SendPdf.subject, SendPdf.msg, SendPdf.file, SendPdf.email)
-        res.send('Envio de PDF')
+
     } catch (error) {
-        console.log('error pdf ->', error)
+        console.log(error)
         return res.status(500).json({ message: 'Error 500' });
 
     }
@@ -425,15 +388,13 @@ exports.pdf = async (req, res) => {
 exports.MontoSales = async (req, res) => {
 
     const role = res.locals.user.roleType
-    console.log('role', role)
 
     try {
         if (role == 'admin') {
 
             const allSales = await VentasMensualModel.find({})
-                .populate('seller', 'fullname dni')
+                .populate('seller', 'fullname ')
             const vendedor = await AdminModel.find({ seller: allSales.seller })
-            console.log('vendedor', vendedor)
             res.send(allSales)
 
         } else if (role == 'seller') {
@@ -442,10 +403,10 @@ exports.MontoSales = async (req, res) => {
                 .populate('seller', 'fullname ')
                 .select(' -fullname')
 
-            console.log('allSales ->', allSales)
             res.send(allSales)
         }
     } catch (err) {
+        console.log(err);
         res.status(500).send(err);
     }
 }
@@ -455,9 +416,6 @@ exports.getSalesAdmin = async (req, res) => {
     const { limit, page, date = "", nameClient = "", dniClient = "", celphoneClient = "", fullname = "", creditLine = "", quotaAmount = "", feeAmount = "", enable = "", saleDetail = "", amountApproved = "" } = req.query
 
     const role = res.locals.user.roleType
-    console.log('role', role)
-    console.log('limit ->', limit + ' ' + 'page ->', page)
-    console.log('Params ->', req.query)
 
     try {
         if (role == 'admin') {
@@ -507,7 +465,7 @@ exports.getSalesAdmin = async (req, res) => {
             res.send(allSales)
         }
     } catch (err) {
-        console.log('error paginate ->', err)
+        console.log(err)
         res.status(500).send(err);
     }
 }
@@ -646,7 +604,7 @@ exports.Logout = async (req, res) => {
 
         res.json({ mensaje: 'Deslogueo ok' })
     } catch (error) {
-        console.log('error Logout Amin ->', error)
+        console.log(error)
         res.status(500).send({ mensaje: 'Error', error })
     }
-} 
+}
