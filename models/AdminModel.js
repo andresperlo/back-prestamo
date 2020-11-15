@@ -1,4 +1,6 @@
-const mongoose = require('mongoose')
+const mongoose = require('mongoose');
+const Paginate = require('mongoose-paginate-v2')
+// let aggregatePaginate = require('mongoose-aggregate-paginate-v2');
 
 const AdminSchema = new mongoose.Schema({
 
@@ -38,7 +40,7 @@ const AdminSchema = new mongoose.Schema({
         trim: true,
         required:true,
         unique: true,
-        lowercase:true
+        lowercase: true
     },
     password:{
         type: String,
@@ -52,8 +54,8 @@ const AdminSchema = new mongoose.Schema({
     },
     enable:{
         type: String,
-        required:true,
-        default: 'SI'
+        required: true,
+        default: "SI"
     },
     token: [String],
     
@@ -62,6 +64,8 @@ const AdminSchema = new mongoose.Schema({
         ref: 'montotal'
     }],
 })
+
+AdminSchema.plugin(Paginate)
  
 const AdminModel = mongoose.model('seller', AdminSchema)
 

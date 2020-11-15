@@ -17,6 +17,7 @@ const VentasMensualModel = require('../models/VentasMensualModel');
 const sendNodeMail = require('../middleware/nodemailer');
 const { parseTwoDigitYear } = require('moment');
 const cloudinary = require('cloudinary').v2
+
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,
@@ -42,14 +43,14 @@ exports.login = async (req, res) => {
 
 
     if (AdminLogin) {
-        if (AdminLogin.enable !== 'SI') {
-            return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos' });
+        if (AdminLogin.enable !== "SI") {
+            return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos Seller o Admin' });
         }
     }
 
     if (SellerLogin) {
-        if (SellerLogin.enable !== 'SI') {
-            return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos' });
+        if (SellerLogin.enable !== "SI") {
+            return res.status(400).json({ mensaje: 'USUARIO y/o Contraseña Incorrectos Seller o Admin' });
         }
     }
 
@@ -169,10 +170,10 @@ exports.CreateSeller = async (req, res) => {
 
 exports.CreateSales = async (req, res) => {
 
-    const { creditLine, typeOperation, newClient, nameClient, dniClient, celphoneClient,
-        quotaAmount, feeAmount, saleDetail } = req.body
+    const { creditLine, typeOperation, newClient, nameClient, dniClient, celphoneClient, quotaAmount, feeAmount, saleDetail } = req.body
 
-    const amountApproved = parseInt(req.body.amountApproved)
+    let amountApproved = parseInt(req.body.amountApproved);
+
     const sellerName = req.body.fullname ? req.body.fullname : res.locals.user.fullname
     console.log('sellerName ', sellerName);
 
@@ -388,6 +389,7 @@ exports.CreateSales = async (req, res) => {
 
 exports.pdf = async (req, res) => {
 
+    console.log(req.params.id);
     const IdPdf = await SellerModel.findById(req.params.id)
     console.log('req.params.id ->', req.params.id)
     console.log('idPdf->', IdPdf)
@@ -531,6 +533,7 @@ exports.getSellerAdmin = async (req, res) => {
 
         res.send(seller)
     } catch (err) {
+        console.log(err);
         res.status(500).send(err);
     }
 }
