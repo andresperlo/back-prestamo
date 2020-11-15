@@ -6,7 +6,7 @@ moment.locale('es')
 const today = moment().format('DD/MM/YYYY');
 const month = moment().format('MMMM/YYYY');
 const exactMonth = moment().format('MMMM');
-const year =  moment().format('YYYY');
+const year = moment().format('YYYY');
 const mongoose = require('mongoose');
 const bcryptjs = require('bcryptjs')
 const jsonwebtoken = require('jsonwebtoken')
@@ -259,7 +259,7 @@ exports.CreateSales = async (req, res) => {
     console.log('year antes de ventas', year);
 
     let ventaTotal = await VentasMensualModel.findOne({ seller: idGral, year: year })
-    
+
     try {
         const usuario = new SellerModel(CreateSalesUser)
         await usuario.save();
@@ -268,16 +268,15 @@ exports.CreateSales = async (req, res) => {
             console.log('año ->', year)
             ventaTotal = new VentasMensualModel({ seller: idGral, year: year })
 
-            let vendedor = await AdminModel.findOne({fullname})
+            let vendedor = await AdminModel.findOne({ fullname })
             let id = ventaTotal._id
-            let saleFound = vendedor.sales.find( sale => sale === id )
+            let saleFound = vendedor.sales.find(sale => sale === id)
 
-            if(!saleFound){
+            if (!saleFound) {
                 vendedor.sales.push(id)
-               await vendedor.save()
+                await vendedor.save()
             }
-           
-            console.log('vendedorNew ->', vendedor)
+
             if (CreateSalesUser.exactMonth == 'enero') {
                 ventaTotal.enero += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
@@ -432,7 +431,7 @@ exports.MontoSales = async (req, res) => {
         if (role == 'admin') {
 
             const allSales = await VentasMensualModel.find({})
-                .populate('seller', 'fullname ')
+                .populate('seller', 'fullname dni')
             const vendedor = await AdminModel.find({ seller: allSales.seller })
             console.log('vendedor', vendedor)
             res.send(allSales)
@@ -526,10 +525,31 @@ exports.getSalesFalseAdmin = async (req, res) => {
 }
 
 exports.getSellerAdmin = async (req, res) => {
+    const { limit, page, dni = "", celphone = "", fullname = "", enable = "", address = "", email = "" } = req.query
 
+    console.log(req.query);
     try {
 
-        const seller = await AdminModel.find({}).populate('sales')
+        const seller = await AdminModel.paginate({
+            enable: {
+                $regex: enable
+            },
+            email: {
+                $regex: email
+            },
+            dni: {
+                $regex: dni
+            },
+            celphone: {
+                $regex: celphone
+            },
+            fullname: {
+                $regex: fullname
+            },
+            address: {
+                $regex: address
+            }
+        }, { limit, page })
 
         res.send(seller)
     } catch (err) {

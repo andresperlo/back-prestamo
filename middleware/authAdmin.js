@@ -7,6 +7,7 @@ module.exports = (role) => async (req, res, next) => {
         
         console.log('entra en Admin')
         const token = req.header('Authorization').replace('Bearer ', '');
+        console.log('token ->', token);
         const verificar = jsonwebtoken.verify(token, process.env.JWT_SECRET);
         const userLogin = await AdminCModel.findOne({ _id: verificar.user.id, token: token });
        
