@@ -5,8 +5,8 @@ const OAuth2 = google.auth.OAuth2;
 
 const oauth2Client = new OAuth2(
     process.env.CLIENTE_ID_G,
-    process.env.CLIENTE_SECRET_G, // Client Secret
-    process.env.REDIRECT_URL_G // Redirect URL
+    process.env.CLIENTE_SECRET_G, 
+    process.env.REDIRECT_URL_G 
 );
 
 oauth2Client.setCredentials({
