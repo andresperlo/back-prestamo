@@ -13,9 +13,7 @@ const AdminModel = require('../models/AdminModel');
 const AdminCreateModel = require('../models/CreateAdminModel');
 const VentasMensualModel = require('../models/VentasMensualModel');
 const sendNodeMail = require('../middleware/nodemailer');
-const { parseTwoDigitYear } = require('moment');
 const cloudinary = require('cloudinary').v2
-
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
     api_key: process.env.CLOUDINARY_API_KEY,

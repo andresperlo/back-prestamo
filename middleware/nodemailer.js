@@ -32,7 +32,7 @@ const transporter = nodemailer.createTransport({
 
 
 const sendNodeMail = (subject, msg, file, email) => {
-    console.log('file NodeMailer', file)
+    console.log('file NodeMailer', file.path)
     //La función recibe por parámetros los datos a llenar en el correo
     const mailOptions = {
         from: email, // email sender
