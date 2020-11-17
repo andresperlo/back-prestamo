@@ -1,7 +1,7 @@
 const { validationResult } = require('express-validator')
 let moment = require('moment');
 moment.locale('es')
-const today = moment().format('DD/MM/YYYY');
+const today = moment().format('YYYY/MM/DD');
 const month = moment().format('MMMM/YYYY');
 const exactMonth = moment().format('MMMM');
 const year = moment().format('YYYY');
@@ -17,9 +17,9 @@ const { parseTwoDigitYear } = require('moment');
 const cloudinary = require('cloudinary').v2
 
 cloudinary.config({
-    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-    api_key: process.env.CLOUDINARY_API_KEY,
-    api_secret: process.env.CLOUDINARY_API_SECRET
+    cloud_name: 'proyecto-final',
+    api_key: '236639489389971',
+    api_secret: 'EdjHVoS94Z5oZo56FQlPXEmXdvQ'
 })
 
 exports.login = async (req, res) => {
@@ -364,19 +364,25 @@ exports.pdf = async (req, res) => {
     try {
 
         const file = Object.values(req.files)
-        const promises = file.map(pdf => {
-            cloudinary.uploader.upload(pdf.path)
-        })
+        console.log('file -> ', file);
+        const promises = file.map(pdf => cloudinary.uploader.upload(pdf.path))
+
+        await Promise.all(promises)
+
+        const results = await Promise.all(promises)
+
+        console.log('promises ->', results);
 
         const SendPdf = {
             subject: 'Nueva Venta',
             msg: '¡Nueva Venta de ' + CreateSalesUser.fullname + '!',
-            file: file,
+            attachmentSrc: file,
             email: CreateSalesUser.email
         }
+        // console.log('Log del sendpfd ->',SendPdf);   
 
-        await sendNodeMail(SendPdf.subject, SendPdf.msg, SendPdf.file, SendPdf.email)
-
+        await new createMail(SendPdf.subject, SendPdf.msg, SendPdf.attachmentSrc, SendPdf.email)
+        res.send('Envio de PDF')
     } catch (error) {
         console.log(error)
         return res.status(500).json({ message: 'Error 500' });

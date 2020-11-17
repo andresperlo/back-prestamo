@@ -14,6 +14,7 @@ app.set('port', process.env.PORT || 3001)
 const Routes = require('./routes')
 
 app.use('/api/v1', Routes)
+
 app.use(function (req, res, next) {
    
     res.status(404).json({ mensaje: 'ERROR: 404 not found index' })

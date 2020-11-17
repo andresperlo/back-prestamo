@@ -49,7 +49,8 @@ router.post('/regsales', [
     check('feeAmount', ' Campo Vacio. montoCuota').notEmpty(),
 ], authAdminSeller(['admin', 'seller']), Admin.CreateSales)
 router.use(formData.parse());
-router.post('/regsales/:id/sendpdf', Admin.pdf)
+// router.post('/regsales/:id/sendpdf', Admin.SendGmailer)
+
 router.get('/allsales', authAdminSeller(['admin', 'seller']), Admin.getSalesAdmin)
 router.get('/montosales', authAdminSeller(['admin', 'seller']), Admin.MontoSales)
 router.get('/allseller', authAdmin('admin'), Admin.getSellerAdmin)
