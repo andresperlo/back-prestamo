@@ -36,10 +36,10 @@ const sendNodeMail = (subject, msg, file, email) => {
     //La función recibe por parámetros los datos a llenar en el correo
     const mailOptions = {
         from: email, // email sender
-         to: `Asturias F & D <proyectofinalrestorant@gmail.com>`,
+        to: `Asturias F & D <proyectofinalrestorant@gmail.com>`,
         subject: subject + ' ' +  email,
         attachments: [{
-            path: file.path,
+            path: file.secure_url,
             filename: file.originalname,
             contentType: 'application/pdf'
          }],
