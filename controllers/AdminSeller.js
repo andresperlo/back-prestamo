@@ -494,6 +494,8 @@ exports.SendGmailer = async (req, res) => {
 
     }
 
+    res.send({message: 'ya esta compagre'})
+
 }
 
 exports.MontoSales = async (req, res) => {
