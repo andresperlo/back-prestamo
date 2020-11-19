@@ -627,6 +627,18 @@ exports.getSellerAdmin = async (req, res) => {
     }
 }
 
+exports.getMontoSales = async (req, res) => {
+
+    console.log('monto id ->', req.params);
+    try {
+        const seller = await VentasMensualModel.findById(req.params.id)
+        res.send(seller)
+    } catch (err) {
+        console.log(err);
+        res.status(500).send(err);
+    }
+}
+
 exports.PutSales = async (req, res) => {
 
     try {
