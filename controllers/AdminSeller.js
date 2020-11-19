@@ -159,7 +159,7 @@ exports.CreateSeller = async (req, res) => {
 
 exports.CreateSales = async (req, res) => {
 
-    const { creditLine, typeOperation, newClient, nameClient, dniClient, celphoneClient, quotaAmount, feeAmount, saleDetail } = req.body
+    const { creditLine, typeOperation, newClient, typeClient, nameClient, dniClient, celphoneClient, quotaAmount, feeAmount, saleDetail } = req.body
 
     let amountApproved = parseInt(req.body.amountApproved);
     const sellerName = req.body.fullname ? req.body.fullname : res.locals.user.fullname
@@ -188,6 +188,7 @@ exports.CreateSales = async (req, res) => {
             creditLine,
             typeOperation,
             newClient,
+            typeClient,
             nameClient,
             dniClient,
             celphoneClient,
@@ -215,6 +216,7 @@ exports.CreateSales = async (req, res) => {
                 creditLine,
                 typeOperation,
                 newClient,
+                typeClient,
                 nameClient,
                 dniClient,
                 celphoneClient,
@@ -232,7 +234,7 @@ exports.CreateSales = async (req, res) => {
 
         }
     }
-
+    console.log('typeClient ->', CreateSalesUser.typeClient)
     let ventaTotal = await VentasMensualModel.findOne({ seller: idGral, year: year })
 
     try {
@@ -493,6 +495,8 @@ exports.SendGmailer = async (req, res) => {
         }
 
     }
+
+    res.send({message: 'ya esta compagre'})
 
 }
 

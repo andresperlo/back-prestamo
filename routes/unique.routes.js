@@ -41,6 +41,7 @@ router.post('/regsales', [
     check('creditLine', 'Campo lineaCredito Vació').notEmpty(),
     check('typeOperation', 'Ingresar un tipOperacion Correcto').notEmpty(),
     check('newClient', 'Campo clienteNuevo Vacio').notEmpty(),
+    check('typeClient', 'Campo Tipo de Cliente Vacio').notEmpty(),
     check('nameClient', 'Campo nombreCliente Vacio').notEmpty(),
     check('dniClient', 'Campo dniCliente Vacio').notEmpty(),
     check('celphoneClient', 'Ingresar un celularCliente Correcto').notEmpty(),
