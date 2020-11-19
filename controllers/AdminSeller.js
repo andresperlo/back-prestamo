@@ -159,7 +159,7 @@ exports.CreateSeller = async (req, res) => {
 
 exports.CreateSales = async (req, res) => {
 
-    const { creditLine, typeOperation, newClient, typeClient, nameClient, dniClient, celphoneClient, quotaAmount, feeAmount, saleDetail } = req.body
+    const { creditLine, typeOperation, newClient, typeClient, nameClient, dniClient, celphoneClient, quotaAmount, quantityQuotas, saleDetail } = req.body
 
     let amountApproved = parseInt(req.body.amountApproved);
     const sellerName = req.body.fullname ? req.body.fullname : res.locals.user.fullname
@@ -194,7 +194,7 @@ exports.CreateSales = async (req, res) => {
             celphoneClient,
             amountApproved,
             quotaAmount,
-            feeAmount,
+            quantityQuotas,
             saleDetail,
             seller: idGral,
             date: today,
@@ -222,7 +222,7 @@ exports.CreateSales = async (req, res) => {
                 celphoneClient,
                 amountApproved,
                 quotaAmount,
-                feeAmount,
+                quantityQuotas,
                 saleDetail,
                 seller: idGral,
                 date: today,
@@ -234,7 +234,7 @@ exports.CreateSales = async (req, res) => {
 
         }
     }
-    console.log('typeClient ->', CreateSalesUser.typeClient)
+    
     let ventaTotal = await VentasMensualModel.findOne({ seller: idGral, year: year })
 
     try {
@@ -354,6 +354,7 @@ exports.CreateSales = async (req, res) => {
 }
 
 exports.SendGmailer = async (req, res) => {
+    console.log('llega CreateSalesUser ->', CreateSalesUser)
     const fs = require('fs');
     const readline = require('readline');
     const { google } = require('googleapis');
@@ -431,6 +432,9 @@ exports.SendGmailer = async (req, res) => {
     /*  */
 
     const file = Object.values(req.files)
+    const {fullname, email, creditLine, typeOperation, newClient, typeClient,
+         nameClient, dniClient, celphoneClient, amountApproved, quotaAmount,
+          quantityQuotas, saleDetail, date} = CreateSalesUser
 
     for (let index = 0; index < file.length; index++) {
         const element = file[index];
@@ -449,16 +453,24 @@ exports.SendGmailer = async (req, res) => {
                 {
                     to: process.env.EMAIL,
                     text: "I hope this works",
-                    html: " <strong> I hope this works </strong>",
-                    subject: "Test email gmail-nodemailer-composer",
+                    html: `<h3 style='margin: 0;'>Nombre del Vendedor: ${fullname}</h3></br>
+                           <h3 style='margin: 0;'>Email del Vendedor: ${email} </h3> </br>
+                           <h3 style='margin: 0;'>Linea de Credito: ${creditLine} </h3> </br>
+                           <h3 style='margin: 0;'>Tipo de Operacion: ${typeOperation} </h3> </br>
+                           <h3 style='margin: 0;'>Nuevo Cliente: ${newClient} </h3> </br>
+                           <h3 style='margin: 0;'>Tipo de Cliente: ${typeClient} </h3> </br>
+                           <h3 style='margin: 0;'>Nombre : ${nameClient} </h3> </br>
+                           <h3 style='margin: 0;'>DNI : ${dniClient} </h3> </br>
+                           <h3 style='margin: 0;'>Celular: ${celphoneClient} </h3> </br>
+                           <h3 style='margin: 0;'>Monto Aprobado: ${amountApproved} </h3> </br>
+                           <h3 style='margin: 0;'>Cantidad de Coutas: ${quotaAmount} </h3> </br>
+                           <h3 style='margin: 0;'>Monto Por Cuota: ${quantityQuotas} </h3> </br>
+                           <h3 style='margin: 0;'>Detalle de la Venta: ${saleDetail} </h3> </br>
+                           <h3 style='margin: 0;'>Fecha: ${date} </h3> </br> 
+                    `,
+                    subject: `${nameClient} | ${fullname}`,
                     textEncoding: "base64",
                     attachments: [
-                        {   // encoded string as an attachment
-                            filename: originalFileName,
-                            path: pathFile,
-                            content: 'aGVsbG8gd29ybGQh',
-                            encoding: 'base64'
-                        },
                         {   // encoded string as an attachment
                             filename: originalFileName,
                             path: pathFile,
@@ -468,7 +480,46 @@ exports.SendGmailer = async (req, res) => {
                     ]
                 });
 
+                let mailSeller = new MailComposer(
+                    {
+                        to: `${email}`,
+                        text: "I hope this works",
+                        html: `<h3 style='margin: 0;'>Confirmacion de Venta Cargada</h3></br>
+                              
+                               <h3 style='margin: 0;'>Fecha: ${date} </h3> </br> 
+                        `,
+                        subject: `Confirmacion de Venta`,
+                        textEncoding: "base64",
+                    });
+
+
+
+                console.log('mail ->', mail)
+
             mail.compile().build((error, msg) => {
+                if (error) return console.log('Error compiling email ' + error);
+
+                const encodedMessage = Buffer.from(msg)
+                    .toString('base64')
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_')
+                    .replace(/=+$/, '');
+
+                const gmail = google.gmail({ version: 'v1', auth });
+                gmail.users.messages.send({
+                    userId: 'me',
+                    resource: {
+                        raw: encodedMessage,
+                    }
+                }, (err, result) => {
+                    if (err) return console.log('NODEMAILER - The API returned an error: ' + err);
+
+                    console.log("NODEMAILER - Sending email reply from server:", result.data);
+                });
+
+            })
+
+            mailSeller.compile().build((error, msg) => {
                 if (error) return console.log('Error compiling email ' + error);
 
                 const encodedMessage = Buffer.from(msg)
@@ -496,7 +547,7 @@ exports.SendGmailer = async (req, res) => {
 
     }
 
-    res.send({message: 'ya esta compagre'})
+  /*   res.send({message: 'ya esta compagre'}) */
 
 }
 
@@ -528,7 +579,7 @@ exports.MontoSales = async (req, res) => {
 
 exports.getSalesAdmin = async (req, res) => {
 
-    const { limit, page, date = "", nameClient = "", dniClient = "", celphoneClient = "", fullname = "", creditLine = "", quotaAmount = "", feeAmount = "", enable = "", saleDetail = "", amountApproved = "" } = req.query
+    const { limit, page, date = "", nameClient = "", dniClient = "", celphoneClient = "", fullname = "", creditLine = "", quotaAmount = "", quantityQuotas = "", enable = "", saleDetail = "", amountApproved = "" } = req.query
 
     const role = res.locals.user.roleType
 
@@ -557,8 +608,8 @@ exports.getSalesAdmin = async (req, res) => {
                 quotaAmount: {
                     $regex: quotaAmount
                 },
-                feeAmount: {
-                    $regex: feeAmount
+                quantityQuotas: {
+                    $regex: quantityQuotas
                 },
                 saleDetail: {
                     $regex: saleDetail

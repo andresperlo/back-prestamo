@@ -47,7 +47,7 @@ router.post('/regsales', [
     check('celphoneClient', 'Ingresar un celularCliente Correcto').notEmpty(),
     check('amountApproved', 'Campo Vacio. montoAprobado').notEmpty(),
     check('quotaAmount', ' Campo Vacio. cantidadCuota').notEmpty(),
-    check('feeAmount', ' Campo Vacio. montoCuota').notEmpty(),
+    check('quantityQuotas', ' Campo Vacio. montoCuota').notEmpty(),
 ], authAdminSeller(['admin', 'seller']), Admin.CreateSales)
 router.use(formData.parse());
 router.post('/regsales/:id/sendpdf', Admin.SendGmailer)
