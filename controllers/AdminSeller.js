@@ -112,8 +112,8 @@ exports.CreateAdmin = async (req, res) => {
     const usuario = new AdminCreateModel(admin);
 
     try {
-        await usuario.save();
-        res.send({ mensaje: 'Tu Administrador se Registro Correctamente', admin })
+       /*  await usuario.save(); */
+        res.send({ mensaje: 'Tu Administrador se Registro Correctamente'})
     } catch (error) {
         console.log(error);
         res.status(500).send(error);
@@ -151,7 +151,7 @@ exports.CreateSeller = async (req, res) => {
 
     try {
         await usuario.save();
-        res.send({ mensaje: 'Tu Usuario se Registro Correctamente', users, id: users._id })
+        res.send({ mensaje: 'Tu Usuario se Registro Correctamente'})
     } catch (error) {
         res.status(500).send(error);
     }
@@ -178,15 +178,7 @@ exports.CreateSales = async (req, res) => {
     }
 
     const email = res.locals.user.email
-    const userExists = await SellerModel.find({ dniClient });
-    const QC = []
-
-    for (let index = 0; index < userExists.length; index++) {
-        const element = userExists[index];
-        let CantidadCoutas = element.quantityQuotas
-        let id = element._id
-        QC.push(CantidadCoutas)
-    }
+    const userExists = await SellerModel.findOne({ dniClient });
 
     if (!userExists) {
 
@@ -214,8 +206,8 @@ exports.CreateSales = async (req, res) => {
     }
 
     if (userExists) {
-        if (QC > '3') {
-            return res.status(400).json({ mensaje: `No puede tener el prestamo. Cuota mayor a 3` })
+        if (userExists.quantityQuotas > 3) {
+            return res.status(400).json({ mensaje: 'No puede tener el prestamo. Cuota mayor a 3' })
         } else {
 
             CreateSalesUser = {
@@ -242,12 +234,12 @@ exports.CreateSales = async (req, res) => {
 
         }
     }
-
+    
     let ventaTotal = await VentasMensualModel.findOne({ seller: idGral, year: year })
 
     try {
         const usuario = new SellerModel(CreateSalesUser)
-         await usuario.save();
+        await usuario.save();
         if (!ventaTotal) {
 
             ventaTotal = new VentasMensualModel({ seller: idGral, year: year })
@@ -255,102 +247,102 @@ exports.CreateSales = async (req, res) => {
             if (CreateSalesUser.exactMonth == 'enero') {
                 ventaTotal.enero += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'febrero') {
                 ventaTotal.febrero += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'marzo') {
                 ventaTotal.marzo += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'abril') {
                 ventaTotal.abril += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'mayo') {
                 ventaTotal.mayo += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'junio') {
                 ventaTotal.junio += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'julio') {
                 ventaTotal.julio += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'agosto') {
                 ventaTotal.agosto += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'septiembre') {
                 ventaTotal.septiembre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'octubre') {
                 ventaTotal.octubre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'noviembre') {
                 ventaTotal.noviembre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'diciembre') {
                 ventaTotal.diciembre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             }
         } else {
 
             if (CreateSalesUser.exactMonth == 'enero') {
                 ventaTotal.enero += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'febrero') {
                 ventaTotal.febrero += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'marzo') {
                 ventaTotal.marzo += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'abril') {
                 ventaTotal.abril += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'mayo') {
                 ventaTotal.mayo += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'junio') {
                 ventaTotal.junio += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'julio') {
                 ventaTotal.julio += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'agosto') {
                 ventaTotal.agosto += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'septiembre') {
                 ventaTotal.septiembre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'octubre') {
                 ventaTotal.octubre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'noviembre') {
                 ventaTotal.noviembre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'diciembre') {
                 ventaTotal.diciembre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                await ventaTotal.save()
+                ventaTotal.save()
             }
         }
 
@@ -440,9 +432,9 @@ exports.SendGmailer = async (req, res) => {
     /*  */
 
     const file = Object.values(req.files)
-    const { fullname, email, creditLine, typeOperation, newClient, typeClient,
-        nameClient, dniClient, celphoneClient, amountApproved, quotaAmount,
-        quantityQuotas, saleDetail, date } = CreateSalesUser
+    const {fullname, email, creditLine, typeOperation, newClient, typeClient,
+         nameClient, dniClient, celphoneClient, amountApproved, quotaAmount,
+          quantityQuotas, saleDetail, date} = CreateSalesUser
 
     for (let index = 0; index < file.length; index++) {
         const element = file[index];
@@ -488,21 +480,21 @@ exports.SendGmailer = async (req, res) => {
                     ]
                 });
 
-            let mailSeller = new MailComposer(
-                {
-                    to: `${email}`,
-                    text: "I hope this works",
-                    html: `<h3 style='margin: 0;'>Confirmacion de Venta Cargada</h3></br>
+                let mailSeller = new MailComposer(
+                    {
+                        to: `${email}`,
+                        text: "I hope this works",
+                        html: `<h3 style='margin: 0;'>Confirmacion de Venta Cargada</h3></br>
                               
                                <h3 style='margin: 0;'>Fecha: ${date} </h3> </br> 
                         `,
-                    subject: `Confirmacion de Venta`,
-                    textEncoding: "base64",
-                });
+                        subject: `Confirmacion de Venta`,
+                        textEncoding: "base64",
+                    });
 
 
 
-            console.log('mail ->', mail)
+                console.log('mail ->', mail)
 
             mail.compile().build((error, msg) => {
                 if (error) return console.log('Error compiling email ' + error);
@@ -555,7 +547,7 @@ exports.SendGmailer = async (req, res) => {
 
     }
 
-    /*   res.send({message: 'ya esta compagre'}) */
+  /*   res.send({message: 'ya esta compagre'}) */
 
 }
 
