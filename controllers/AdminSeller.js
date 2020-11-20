@@ -112,7 +112,7 @@ exports.CreateAdmin = async (req, res) => {
     const usuario = new AdminCreateModel(admin);
 
     try {
-       /*  await usuario.save(); */
+        await usuario.save(); 
         res.send({ mensaje: 'Tu Administrador se Registro Correctamente'})
     } catch (error) {
         console.log(error);
