@@ -547,7 +547,7 @@ exports.SendGmailer = async (req, res) => {
 
     }
 
-  /*   res.send({message: 'ya esta compagre'}) */
+     res.send({message: 'se envio mail'}) 
 
 }
 
