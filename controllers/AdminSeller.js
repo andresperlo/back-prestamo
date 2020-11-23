@@ -559,14 +559,14 @@ exports.MontoSales = async (req, res) => {
         if (role == 'admin') {
 
             const allSales = await VentasMensualModel.find({})
-                .populate('seller', 'fullname ')
+                .populate('seller', 'fullname dni')
             const vendedor = await AdminModel.find({ seller: allSales.seller })
             res.send(allSales)
 
         } else if (role == 'seller') {
 
             const allSales = await VentasMensualModel.findOne({ seller: res.locals.user.id, year: year })
-                .populate('seller', 'fullname ')
+                .populate('seller', 'fullname')
                 .select(' -fullname')
 
             res.send(allSales)
