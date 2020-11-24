@@ -112,8 +112,8 @@ exports.CreateAdmin = async (req, res) => {
     const usuario = new AdminCreateModel(admin);
 
     try {
-        await usuario.save(); 
-        res.send({ mensaje: 'Tu Administrador se Registro Correctamente'})
+        await usuario.save();
+        res.send({ mensaje: 'Tu Administrador se Registro Correctamente' })
     } catch (error) {
         console.log(error);
         res.status(500).send(error);
@@ -151,7 +151,7 @@ exports.CreateSeller = async (req, res) => {
 
     try {
         await usuario.save();
-        res.send({ mensaje: 'Tu Usuario se Registro Correctamente'})
+        res.send({ mensaje: 'Tu Usuario se Registro Correctamente' })
     } catch (error) {
         res.status(500).send(error);
     }
@@ -234,7 +234,7 @@ exports.CreateSales = async (req, res) => {
 
         }
     }
-    
+
     let ventaTotal = await VentasMensualModel.findOne({ seller: idGral, year: year })
 
     try {
@@ -432,9 +432,9 @@ exports.SendGmailer = async (req, res) => {
     /*  */
 
     const file = Object.values(req.files)
-    const {fullname, email, creditLine, typeOperation, newClient, typeClient,
-         nameClient, dniClient, celphoneClient, amountApproved, quotaAmount,
-          quantityQuotas, saleDetail, date} = CreateSalesUser
+    const { fullname, email, creditLine, typeOperation, newClient, typeClient,
+        nameClient, dniClient, celphoneClient, amountApproved, quotaAmount,
+        quantityQuotas, saleDetail, date } = CreateSalesUser
 
     for (let index = 0; index < file.length; index++) {
         const element = file[index];
@@ -480,21 +480,21 @@ exports.SendGmailer = async (req, res) => {
                     ]
                 });
 
-                let mailSeller = new MailComposer(
-                    {
-                        to: `${email}`,
-                        text: "I hope this works",
-                        html: `<h3 style='margin: 0;'>Confirmacion de Venta Cargada</h3></br>
+            let mailSeller = new MailComposer(
+                {
+                    to: `${email}`,
+                    text: "I hope this works",
+                    html: `<h3 style='margin: 0;'>Confirmacion de Venta Cargada</h3></br>
                               
                                <h3 style='margin: 0;'>Fecha: ${date} </h3> </br> 
                         `,
-                        subject: `Confirmacion de Venta`,
-                        textEncoding: "base64",
-                    });
+                    subject: `Confirmacion de Venta`,
+                    textEncoding: "base64",
+                });
 
 
 
-                console.log('mail ->', mail)
+            console.log('mail ->', mail)
 
             mail.compile().build((error, msg) => {
                 if (error) return console.log('Error compiling email ' + error);
@@ -547,7 +547,7 @@ exports.SendGmailer = async (req, res) => {
 
     }
 
-     res.send({message: 'se envio mail'}) 
+    res.send({ message: 'se envio mail' })
 
 }
 
@@ -701,10 +701,66 @@ exports.PutSales = async (req, res) => {
 exports.SalesDis = async (req, res) => {
 
     try {
-        const sales = await SellerModel.findByIdAndUpdate(req.params.id, { enable: false }, { new: true })
+
+        const sales = await SellerModel.findByIdAndUpdate(req.params.id, { enable: "NO" }, { new: true })
+        const fullname = sales.fullname
+        const seller = await AdminModel.findOne({ fullname })
+        let sale = await VentasMensualModel.findOne({ seller: seller._id, year })
+
+        if (sales.exactMonth == 'enero') {
+            sale.enero -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'febrero') {
+            sale.febrero -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'marzo') {
+            sale.marzo -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'abril') {
+            sale.abril -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'mayo') {
+            sale.mayo -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'junio') {
+            sale.junio -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'julio') {
+            sale.julio -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'agosto') {
+            sale.agosto -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'septiembre') {
+            sale.septiembre -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'octubre') {
+            sale.octubre -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'noviembre') {
+            sale.noviembre -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'diciembre') {
+            sale.diciembre -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            await sale.save()
+        }
+
 
         res.send(sales)
     } catch (err) {
+        console.log('err ->', err)
         res.status(500).send(err);
     }
 }
@@ -712,10 +768,65 @@ exports.SalesDis = async (req, res) => {
 exports.SalesEn = async (req, res) => {
 
     try {
-        const sales = await SellerModel.findByIdAndUpdate(req.params.id, { enable: true }, { new: true }).select('-token -password -__v -user')
 
+        const sales = await SellerModel.findByIdAndUpdate(req.params.id, { enable: "SI" }, { new: true }).select('-token -password -__v -user')
+        const amountApproved = parseFloat(sales.amountApproved)
+        const fullname = sales.fullname
+        const seller = await AdminModel.findOne({ fullname })
+        let sale = await VentasMensualModel.findOne({ seller: seller._id, year })
+
+        if (sales.exactMonth == 'enero') {
+            sale.enero += amountApproved
+            sale.annualAmountApproved += amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'febrero') {
+            sale.febrero += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'marzo') {
+            sale.marzo += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'abril') {
+            sale.abril += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'mayo') {
+            sale.mayo += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'junio') {
+            sale.junio += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'julio') {
+            sale.julio += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'agosto') {
+            sale.agosto += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'septiembre') {
+            sale.septiembre += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'octubre') {
+            sale.octubre += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'noviembre') {
+            sale.noviembre += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            await sale.save()
+        } else if (sales.exactMonth == 'diciembre') {
+            sale.diciembre += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            await sale.save()
+        }
         res.send(sales)
     } catch (err) {
+        console.log('error ->', err)
         res.status(500).send(err);
     }
 }
@@ -739,8 +850,10 @@ exports.PutSeller = async (req, res) => {
 exports.SellerDis = async (req, res) => {
 
     try {
-        const seller = await AdminModel.findByIdAndUpdate(req.params.id, { enable: false }, { new: true })
+        const seller = await AdminModel.findByIdAndUpdate(req.params.id, { enable: 'NO' }, { new: true })
+        console.log('seller ->', seller)
             .select('-token -password -__v')
+
         res.send(seller)
     } catch (err) {
         res.status(500).send(err);
@@ -750,7 +863,7 @@ exports.SellerDis = async (req, res) => {
 exports.SellerEn = async (req, res) => {
 
     try {
-        const seller = await AdminModel.findByIdAndUpdate(req.params.id, { enable: true }, { new: true })
+        const seller = await AdminModel.findByIdAndUpdate(req.params.id, { enable: 'SI' }, { new: true })
             .select('-token -password -__v')
         res.send(seller)
     } catch (err) {
