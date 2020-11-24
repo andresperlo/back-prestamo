@@ -113,7 +113,7 @@ exports.CreateAdmin = async (req, res) => {
 
     try {
         await usuario.save();
-        res.send({ mensaje: 'Tu Administrador se Registro Correctamente', admin })
+        res.send({ mensaje: 'Tu Administrador se Registro Correctamente' })
     } catch (error) {
         console.log(error);
         res.status(500).send(error);
@@ -151,7 +151,7 @@ exports.CreateSeller = async (req, res) => {
 
     try {
         await usuario.save();
-        res.send({ mensaje: 'Tu Usuario se Registro Correctamente', users, id: users._id })
+        res.send({ mensaje: 'Tu Usuario se Registro Correctamente' })
     } catch (error) {
         res.status(500).send(error);
     }
@@ -159,7 +159,7 @@ exports.CreateSeller = async (req, res) => {
 
 exports.CreateSales = async (req, res) => {
 
-    const { creditLine, typeOperation, newClient, typeClient, nameClient, dniClient, celphoneClient, quotaAmount, feeAmount, saleDetail } = req.body
+    const { creditLine, typeOperation, newClient, typeClient, nameClient, dniClient, celphoneClient, quotaAmount, quantityQuotas, saleDetail } = req.body
 
     let amountApproved = parseInt(req.body.amountApproved);
     const sellerName = req.body.fullname ? req.body.fullname : res.locals.user.fullname
@@ -194,7 +194,7 @@ exports.CreateSales = async (req, res) => {
             celphoneClient,
             amountApproved,
             quotaAmount,
-            feeAmount,
+            quantityQuotas,
             saleDetail,
             seller: idGral,
             date: today,
@@ -206,7 +206,7 @@ exports.CreateSales = async (req, res) => {
     }
 
     if (userExists) {
-        if (userExists.quotaAmount > 3) {
+        if (userExists.quantityQuotas > 3) {
             return res.status(400).json({ mensaje: 'No puede tener el prestamo. Cuota mayor a 3' })
         } else {
 
@@ -222,7 +222,7 @@ exports.CreateSales = async (req, res) => {
                 celphoneClient,
                 amountApproved,
                 quotaAmount,
-                feeAmount,
+                quantityQuotas,
                 saleDetail,
                 seller: idGral,
                 date: today,
@@ -234,12 +234,12 @@ exports.CreateSales = async (req, res) => {
 
         }
     }
-    console.log('typeClient ->', CreateSalesUser.typeClient)
+
     let ventaTotal = await VentasMensualModel.findOne({ seller: idGral, year: year })
 
     try {
         const usuario = new SellerModel(CreateSalesUser)
-        await usuario.save();
+        /*  await usuario.save(); */
         if (!ventaTotal) {
 
             ventaTotal = new VentasMensualModel({ seller: idGral, year: year })
@@ -247,50 +247,64 @@ exports.CreateSales = async (req, res) => {
             if (CreateSalesUser.exactMonth == 'enero') {
                 ventaTotal.enero += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasEnero += 1
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'febrero') {
                 ventaTotal.febrero += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasFebrero += 1
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'marzo') {
                 ventaTotal.marzo += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasMarzo += 1
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'abril') {
                 ventaTotal.abril += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasAbril += 1
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'mayo') {
                 ventaTotal.mayo += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasMayo += 1
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'junio') {
                 ventaTotal.junio += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasJunio += 1
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'julio') {
                 ventaTotal.julio += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasJulio += 1
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'agosto') {
                 ventaTotal.agosto += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasAgosto += 1
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'septiembre') {
                 ventaTotal.septiembre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasSeptiembre += 1
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'octubre') {
                 ventaTotal.octubre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasOctubre += 1
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'noviembre') {
                 ventaTotal.noviembre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasNoviembre += 1
+                ventaTotal.ventasNoviembre += 1
+                console.log('suma ->', ventaTotal.ventasNoviembre += 1)
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'diciembre') {
                 ventaTotal.diciembre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasDiciembre += 1
                 ventaTotal.save()
             }
         } else {
@@ -298,50 +312,64 @@ exports.CreateSales = async (req, res) => {
             if (CreateSalesUser.exactMonth == 'enero') {
                 ventaTotal.enero += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasEnero += 1
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'febrero') {
                 ventaTotal.febrero += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasFebrero += 1
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'marzo') {
                 ventaTotal.marzo += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasMarzo += 1
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'abril') {
                 ventaTotal.abril += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasAbril += 1
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'mayo') {
                 ventaTotal.mayo += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasMayo += 1
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'junio') {
                 ventaTotal.junio += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasJunio += 1
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'julio') {
                 ventaTotal.julio += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasJulio += 1
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'agosto') {
                 ventaTotal.agosto += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasAgosto += 1
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'septiembre') {
                 ventaTotal.septiembre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasSeptiembre += 1
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'octubre') {
                 ventaTotal.octubre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasOctubre += 1
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'noviembre') {
                 ventaTotal.noviembre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasNoviembre += 1
+                ventaTotal.ventasNoviembre += 1
+                console.log('suma ->', ventaTotal.ventasNoviembre += 1)
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'diciembre') {
                 ventaTotal.diciembre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
+                let suma = ventaTotal.ventasDiciembre += 1
                 ventaTotal.save()
             }
         }
@@ -354,6 +382,7 @@ exports.CreateSales = async (req, res) => {
 }
 
 exports.SendGmailer = async (req, res) => {
+    console.log('llega CreateSalesUser ->', CreateSalesUser)
     const fs = require('fs');
     const readline = require('readline');
     const { google } = require('googleapis');
@@ -431,6 +460,9 @@ exports.SendGmailer = async (req, res) => {
     /*  */
 
     const file = Object.values(req.files)
+    const { fullname, email, creditLine, typeOperation, newClient, typeClient,
+        nameClient, dniClient, celphoneClient, amountApproved, quotaAmount,
+        quantityQuotas, saleDetail, date } = CreateSalesUser
 
     for (let index = 0; index < file.length; index++) {
         const element = file[index];
@@ -449,16 +481,24 @@ exports.SendGmailer = async (req, res) => {
                 {
                     to: process.env.EMAIL,
                     text: "I hope this works",
-                    html: " <strong> I hope this works </strong>",
-                    subject: "Test email gmail-nodemailer-composer",
+                    html: `<h3 style='margin: 0;'>Nombre del Vendedor: ${fullname}</h3></br>
+                           <h3 style='margin: 0;'>Email del Vendedor: ${email} </h3> </br>
+                           <h3 style='margin: 0;'>Linea de Credito: ${creditLine} </h3> </br>
+                           <h3 style='margin: 0;'>Tipo de Operacion: ${typeOperation} </h3> </br>
+                           <h3 style='margin: 0;'>Nuevo Cliente: ${newClient} </h3> </br>
+                           <h3 style='margin: 0;'>Tipo de Cliente: ${typeClient} </h3> </br>
+                           <h3 style='margin: 0;'>Nombre : ${nameClient} </h3> </br>
+                           <h3 style='margin: 0;'>DNI : ${dniClient} </h3> </br>
+                           <h3 style='margin: 0;'>Celular: ${celphoneClient} </h3> </br>
+                           <h3 style='margin: 0;'>Monto Aprobado: ${amountApproved} </h3> </br>
+                           <h3 style='margin: 0;'>Cantidad de Coutas: ${quantityQuotas} </h3> </br>
+                           <h3 style='margin: 0;'>Monto Por Cuota: ${quotaAmount} </h3> </br>
+                           <h3 style='margin: 0;'>Detalle de la Venta: ${saleDetail} </h3> </br>
+                           <h3 style='margin: 0;'>Fecha: ${date} </h3> </br> 
+                    `,
+                    subject: `${nameClient} | ${fullname}`,
                     textEncoding: "base64",
                     attachments: [
-                        {   // encoded string as an attachment
-                            filename: originalFileName,
-                            path: pathFile,
-                            content: 'aGVsbG8gd29ybGQh',
-                            encoding: 'base64'
-                        },
                         {   // encoded string as an attachment
                             filename: originalFileName,
                             path: pathFile,
@@ -468,7 +508,46 @@ exports.SendGmailer = async (req, res) => {
                     ]
                 });
 
+            let mailSeller = new MailComposer(
+                {
+                    to: `${email}`,
+                    text: "I hope this works",
+                    html: `<h3 style='margin: 0;'>Confirmacion de Venta Cargada</h3></br>
+                              
+                               <h3 style='margin: 0;'>Fecha: ${date} </h3> </br> 
+                        `,
+                    subject: `Confirmacion de Venta`,
+                    textEncoding: "base64",
+                });
+
+
+
+            console.log('mail ->', mail)
+
             mail.compile().build((error, msg) => {
+                if (error) return console.log('Error compiling email ' + error);
+
+                const encodedMessage = Buffer.from(msg)
+                    .toString('base64')
+                    .replace(/\+/g, '-')
+                    .replace(/\//g, '_')
+                    .replace(/=+$/, '');
+
+                const gmail = google.gmail({ version: 'v1', auth });
+                gmail.users.messages.send({
+                    userId: 'me',
+                    resource: {
+                        raw: encodedMessage,
+                    }
+                }, (err, result) => {
+                    if (err) return console.log('NODEMAILER - The API returned an error: ' + err);
+
+                    console.log("NODEMAILER - Sending email reply from server:", result.data);
+                });
+
+            })
+
+            mailSeller.compile().build((error, msg) => {
                 if (error) return console.log('Error compiling email ' + error);
 
                 const encodedMessage = Buffer.from(msg)
@@ -496,7 +575,7 @@ exports.SendGmailer = async (req, res) => {
 
     }
 
-    res.send({message: 'ya esta compagre'})
+    res.send({ message: 'se envio mail' })
 
 }
 
@@ -515,7 +594,7 @@ exports.MontoSales = async (req, res) => {
         } else if (role == 'seller') {
 
             const allSales = await VentasMensualModel.findOne({ seller: res.locals.user.id, year: year })
-                .populate('seller', 'fullname ')
+                .populate('seller', 'fullname')
                 .select(' -fullname')
 
             res.send(allSales)
@@ -528,7 +607,7 @@ exports.MontoSales = async (req, res) => {
 
 exports.getSalesAdmin = async (req, res) => {
 
-    const { limit, page, date = "", nameClient = "", dniClient = "", celphoneClient = "", fullname = "", creditLine = "", quotaAmount = "", feeAmount = "", enable = "", saleDetail = "", amountApproved = "" } = req.query
+    const { limit, page, date = "", nameClient = "", dniClient = "", celphoneClient = "", fullname = "", creditLine = "", quotaAmount = "", quantityQuotas = "", enable = "", saleDetail = "", amountApproved = "" } = req.query
 
     const role = res.locals.user.roleType
 
@@ -557,8 +636,8 @@ exports.getSalesAdmin = async (req, res) => {
                 quotaAmount: {
                     $regex: quotaAmount
                 },
-                feeAmount: {
-                    $regex: feeAmount
+                quantityQuotas: {
+                    $regex: quantityQuotas
                 },
                 saleDetail: {
                     $regex: saleDetail
@@ -662,10 +741,76 @@ exports.PutSales = async (req, res) => {
 exports.SalesDis = async (req, res) => {
 
     try {
-        const sales = await SellerModel.findByIdAndUpdate(req.params.id, { enable: false }, { new: true })
 
+        const sales = await SellerModel.findByIdAndUpdate(req.params.id, { enable: "NO" }, { new: true })
+        const fullname = sales.fullname
+        const seller = await AdminModel.findOne({ fullname })
+        let sale = await VentasMensualModel.findOne({ seller: seller._id, year })
+
+        if (sales.exactMonth == 'enero') {
+            sale.enero -= amountApproved
+            sale.annualAmountApproved -= amountApproved
+            let suma = sale.ventasEnero -= 1
+            await sale.save()
+        } else if (sales.exactMonth == 'febrero') {
+            sale.febrero -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            let suma = sale.ventasFebrero -= 1
+            await sale.save()
+        } else if (sales.exactMonth == 'marzo') {
+            sale.marzo -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            let suma = sale.ventasMarzo -= 1
+            await sale.save()
+        } else if (sales.exactMonth == 'abril') {
+            sale.abril -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            let suma = sale.ventasAbril -= 1
+            await sale.save()
+        } else if (sales.exactMonth == 'mayo') {
+            sale.mayo -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            let suma = sale.ventasMayo -= 1
+            await sale.save()
+        } else if (sales.exactMonth == 'junio') {
+            sale.junio -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            let suma = sale.ventasJunio -= 1
+            await sale.save()
+        } else if (sales.exactMonth == 'julio') {
+            sale.julio -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            let suma = sale.ventasJulio -= 1
+            await sale.save()
+        } else if (sales.exactMonth == 'agosto') {
+            sale.agosto -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            let suma = sale.ventasAgosto -= 1
+            await sale.save()
+        } else if (sales.exactMonth == 'septiembre') {
+            sale.septiembre -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            let suma = sale.ventasSeptiembre -= 1
+            await sale.save()
+        } else if (sales.exactMonth == 'octubre') {
+            sale.octubre -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            let suma = sale.ventasOctubre -= 1
+            await sale.save()
+        } else if (sales.exactMonth == 'noviembre') {
+            sale.noviembre -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            let suma = sale.ventasNoviembre -= 1
+            await sale.save()
+        } else if (sales.exactMonth == 'diciembre') {
+            sale.diciembre -= sales.amountApproved
+            sale.annualAmountApproved -= sales.amountApproved
+            let suma = sale.ventasDiciembre -= 1
+            await sale.save()
+        }
         res.send(sales)
     } catch (err) {
+        console.log('err ->', err)
         res.status(500).send(err);
     }
 }
@@ -673,10 +818,77 @@ exports.SalesDis = async (req, res) => {
 exports.SalesEn = async (req, res) => {
 
     try {
-        const sales = await SellerModel.findByIdAndUpdate(req.params.id, { enable: true }, { new: true }).select('-token -password -__v -user')
 
+        const sales = await SellerModel.findByIdAndUpdate(req.params.id, { enable: "SI" }, { new: true }).select('-token -password -__v -user')
+        const amountApproved = parseFloat(sales.amountApproved)
+        const fullname = sales.fullname
+        const seller = await AdminModel.findOne({ fullname })
+        let sale = await VentasMensualModel.findOne({ seller: seller._id, year })
+
+        if (sales.exactMonth == 'enero') {
+            sale.enero += amountApproved
+            sale.annualAmountApproved += amountApproved
+            let suma = sale.ventasEnero += 1
+            await sale.save()
+        } else if (sales.exactMonth == 'febrero') {
+            sale.febrero += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            let suma = sale.ventasFebrero += 1
+            await sale.save()
+        } else if (sales.exactMonth == 'marzo') {
+            sale.marzo += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            let suma = sale.ventasMarzo += 1
+            await sale.save()
+        } else if (sales.exactMonth == 'abril') {
+            sale.abril += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            let suma = sale.ventasAbril += 1
+            await sale.save()
+        } else if (sales.exactMonth == 'mayo') {
+            sale.mayo += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            let suma = sale.ventasMayo += 1
+            await sale.save()
+        } else if (sales.exactMonth == 'junio') {
+            sale.junio += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            let suma = sale.ventasJunio += 1
+            await sale.save()
+        } else if (sales.exactMonth == 'julio') {
+            sale.julio += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            let suma = sale.ventasJulio += 1
+            await sale.save()
+        } else if (sales.exactMonth == 'agosto') {
+            sale.agosto += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            let suma = sale.ventasAgosto += 1
+            await sale.save()
+        } else if (sales.exactMonth == 'septiembre') {
+            sale.septiembre += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            let suma = sale.ventasSeptiembre += 1
+            await sale.save()
+        } else if (sales.exactMonth == 'octubre') {
+            sale.octubre += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            let suma = sale.ventasOctubre += 1
+            await sale.save()
+        } else if (sales.exactMonth == 'noviembre') {
+            sale.noviembre += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            let suma = sale.ventasNoviembre += 1
+            await sale.save()
+        } else if (sales.exactMonth == 'diciembre') {
+            sale.diciembre += sales.amountApproved
+            sale.annualAmountApproved += sales.amountApproved
+            let suma = sale.ventasDiciembre += 1
+            await sale.save()
+        }
         res.send(sales)
     } catch (err) {
+        console.log('error ->', err)
         res.status(500).send(err);
     }
 }
@@ -700,8 +912,10 @@ exports.PutSeller = async (req, res) => {
 exports.SellerDis = async (req, res) => {
 
     try {
-        const seller = await AdminModel.findByIdAndUpdate(req.params.id, { enable: false }, { new: true })
+        const seller = await AdminModel.findByIdAndUpdate(req.params.id, { enable: 'NO' }, { new: true })
+        console.log('seller ->', seller)
             .select('-token -password -__v')
+
         res.send(seller)
     } catch (err) {
         res.status(500).send(err);
@@ -711,7 +925,7 @@ exports.SellerDis = async (req, res) => {
 exports.SellerEn = async (req, res) => {
 
     try {
-        const seller = await AdminModel.findByIdAndUpdate(req.params.id, { enable: true }, { new: true })
+        const seller = await AdminModel.findByIdAndUpdate(req.params.id, { enable: 'SI' }, { new: true })
             .select('-token -password -__v')
         res.send(seller)
     } catch (err) {
@@ -735,3 +949,4 @@ exports.Logout = async (req, res) => {
         res.status(500).send({ mensaje: 'Error', error })
     }
 }
+

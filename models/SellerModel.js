@@ -53,7 +53,7 @@ const SellerSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
-    feeAmount: {
+    quantityQuotas: {
         type: String,
         required: true,
         trim: true
