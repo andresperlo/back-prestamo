@@ -63,4 +63,7 @@ router.put('/sellerdisenable/:id', authAdmin('admin'), Admin.SellerDis)
 router.put('/sellerenable/:id', authAdmin('admin'), Admin.SellerEn)
 router.get('/logout', authAdminSeller(['admin', 'seller']), Admin.Logout)
 
+router.get('/recorrer', Admin.recorrido)
+
+
 module.exports = router;

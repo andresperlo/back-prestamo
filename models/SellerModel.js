@@ -23,10 +23,6 @@ const SellerSchema = new mongoose.Schema({
         trim: true,
         required: true
     },
-    typeClient:{
-        type: String,
-        trim: true
-    },
     nameClient: {
         type: String,
         trim: true,

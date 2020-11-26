@@ -159,7 +159,7 @@ exports.CreateSeller = async (req, res) => {
 
 exports.CreateSales = async (req, res) => {
 
-    const { creditLine, typeOperation, newClient, typeClient, nameClient, dniClient, celphoneClient, quotaAmount, quantityQuotas, saleDetail } = req.body
+    const { creditLine, typeOperation, newClient, nameClient, dniClient, celphoneClient, quotaAmount, quantityQuotas, saleDetail } = req.body
 
     let amountApproved = parseInt(req.body.amountApproved);
     const sellerName = req.body.fullname ? req.body.fullname : res.locals.user.fullname
@@ -188,7 +188,6 @@ exports.CreateSales = async (req, res) => {
             creditLine,
             typeOperation,
             newClient,
-            typeClient,
             nameClient,
             dniClient,
             celphoneClient,
@@ -216,7 +215,6 @@ exports.CreateSales = async (req, res) => {
                 creditLine,
                 typeOperation,
                 newClient,
-                typeClient,
                 nameClient,
                 dniClient,
                 celphoneClient,
@@ -239,7 +237,7 @@ exports.CreateSales = async (req, res) => {
 
     try {
         const usuario = new SellerModel(CreateSalesUser)
-        /*  await usuario.save(); */
+        await usuario.save();
         if (!ventaTotal) {
 
             ventaTotal = new VentasMensualModel({ seller: idGral, year: year })
@@ -247,7 +245,7 @@ exports.CreateSales = async (req, res) => {
             if (CreateSalesUser.exactMonth == 'enero') {
                 ventaTotal.enero += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
-                let suma = ventaTotal.ventasEnero += 1
+                ventaTotal.ventasEnero++
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'febrero') {
                 ventaTotal.febrero += CreateSalesUser.amountApproved
@@ -298,8 +296,6 @@ exports.CreateSales = async (req, res) => {
                 ventaTotal.noviembre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 let suma = ventaTotal.ventasNoviembre += 1
-                ventaTotal.ventasNoviembre += 1
-                console.log('suma ->', ventaTotal.ventasNoviembre += 1)
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'diciembre') {
                 ventaTotal.diciembre += CreateSalesUser.amountApproved
@@ -363,8 +359,6 @@ exports.CreateSales = async (req, res) => {
                 ventaTotal.noviembre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 let suma = ventaTotal.ventasNoviembre += 1
-                ventaTotal.ventasNoviembre += 1
-                console.log('suma ->', ventaTotal.ventasNoviembre += 1)
                 ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'diciembre') {
                 ventaTotal.diciembre += CreateSalesUser.amountApproved
@@ -482,7 +476,6 @@ exports.SendGmailer = async (req, res) => {
                     to: process.env.EMAIL,
                     text: "I hope this works",
                     html: `<h3 style='margin: 0;'>Nombre del Vendedor: ${fullname}</h3></br>
-                           <h3 style='margin: 0;'>Email del Vendedor: ${email} </h3> </br>
                            <h3 style='margin: 0;'>Linea de Credito: ${creditLine} </h3> </br>
                            <h3 style='margin: 0;'>Tipo de Operacion: ${typeOperation} </h3> </br>
                            <h3 style='margin: 0;'>Nuevo Cliente: ${newClient} </h3> </br>
@@ -508,20 +501,6 @@ exports.SendGmailer = async (req, res) => {
                     ]
                 });
 
-            let mailSeller = new MailComposer(
-                {
-                    to: `${email}`,
-                    text: "I hope this works",
-                    html: `<h3 style='margin: 0;'>Confirmacion de Venta Cargada</h3></br>
-                              
-                               <h3 style='margin: 0;'>Fecha: ${date} </h3> </br> 
-                        `,
-                    subject: `Confirmacion de Venta`,
-                    textEncoding: "base64",
-                });
-
-
-
             console.log('mail ->', mail)
 
             mail.compile().build((error, msg) => {
@@ -546,31 +525,6 @@ exports.SendGmailer = async (req, res) => {
                 });
 
             })
-
-            mailSeller.compile().build((error, msg) => {
-                if (error) return console.log('Error compiling email ' + error);
-
-                const encodedMessage = Buffer.from(msg)
-                    .toString('base64')
-                    .replace(/\+/g, '-')
-                    .replace(/\//g, '_')
-                    .replace(/=+$/, '');
-
-                const gmail = google.gmail({ version: 'v1', auth });
-                gmail.users.messages.send({
-                    userId: 'me',
-                    resource: {
-                        raw: encodedMessage,
-                    }
-                }, (err, result) => {
-                    if (err) return console.log('NODEMAILER - The API returned an error: ' + err);
-
-                    console.log("NODEMAILER - Sending email reply from server:", result.data);
-                });
-
-            })
-
-
         }
 
     }
@@ -588,7 +542,7 @@ exports.MontoSales = async (req, res) => {
 
             const allSales = await VentasMensualModel.find({})
                 .populate('seller', 'fullname dni')
-            const vendedor = await AdminModel.find({ seller: allSales.seller })
+            const vendedor = await AdminModel.find({ seller: allSales.seller }, { enable: 'SI' })
             res.send(allSales)
 
         } else if (role == 'seller') {
@@ -938,3 +892,158 @@ exports.Logout = async (req, res) => {
     }
 }
 
+exports.recorrido = async (req, res) => {
+
+    let todasVentas = await SellerModel.find()
+    console.log('typeof ->', typeof todasVentas);
+    /* 
+        let ventaTotal = await VentasMensualModel.findOne({ seller: '5fabf18790b10e24f89c009c' , year })
+        console.log('ventaTotal', ventaTotal) */
+
+
+    for (let index = 0; index < todasVentas.length; index++) {
+
+        let sales = todasVentas[index]
+        let amountApproved = parseFloat(sales.amountApproved)
+        console.log('amount ->', amountApproved)
+        console.log('sales IDSeller ->', sales.seller)
+        console.log('Vendedor ->', sales.fullname)
+        console.log('Cliente ->', sales.nameClient)
+        console.log('mes ->', sales.exactMonth);
+        let mes = sales.exactMonth
+        let ventaTotal = await VentasMensualModel.findOne({ seller: sales.seller, year: sales.year })
+        console.log('ventatotal ->', ventaTotal)
+
+        if (!ventaTotal) {
+            ventaTotal = new VentasMensualModel({ seller: sales.seller, year: sales.year })
+            console.log('ventaTotal ->', ventaTotal)
+
+            if (mes == 'enero') {
+                ventaTotal.enero += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasEnero++
+                await ventaTotal.save()
+            } else if (mes == 'febrero') {
+                ventaTotal.febrero += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasFebrero++
+                await ventaTotal.save()
+            } else if (sales.exactMonth == 'marzo') {
+                ventaTotal.marzo += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasMarzo++
+                await ventaTotal.save()
+            } else if (sales.exactMonth == 'abril') {
+                ventaTotal.abril += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasAbril++
+                await ventaTotal.save()
+            } else if (sales.exactMonth == 'mayo') {
+                ventaTotal.mayo += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasMayo++
+                await ventaTotal.save()
+            } else if (sales.exactMonth == 'junio') {
+                ventaTotal.junio += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasJunio++
+                await ventaTotal.save()
+            } else if (sales.exactMonth == 'julio') {
+                ventaTotal.julio += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasJulio++
+                await ventaTotal.save()
+            } else if (sales.exactMonth == 'agosto') {
+                ventaTotal.agosto += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasAgosto++
+                await ventaTotal.save()
+            } else if (sales.exactMonth == 'septiembre') {
+                ventaTotal.septiembre += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasSeptiembre++
+                await ventaTotal.save()
+            } else if (sales.exactMonth == 'octubre') {
+                ventaTotal.octubre += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasOctubre++
+                await ventaTotal.save()
+            } else if (sales.exactMonth == 'noviembre') {
+                ventaTotal.noviembre += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasNoviembre++
+                await ventaTotal.save()
+            } else if (sales.exactMonth == 'diciembre') {
+                ventaTotal.diciembre += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasDiciembre++
+                await ventaTotal.save()
+            }
+        } else {
+
+            if (sales.exactMonth === 'enero') {
+                ventaTotal.enero += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasEnero++
+                await ventaTotal.save()
+            } else if (sales.exactMonth === 'febrero') {
+                ventaTotal.febrero += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasFebrero++
+                await ventaTotal.save()
+            } else if (sales.exactMonth == 'marzo') {
+                ventaTotal.marzo += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasMarzo++
+                await ventaTotal.save()
+            } else if (sales.exactMonth == 'abril') {
+                ventaTotal.abril += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasAbril++
+                await ventaTotal.save()
+            } else if (sales.exactMonth == 'mayo') {
+                ventaTotal.mayo += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasMayo++
+                await ventaTotal.save()
+            } else if (sales.exactMonth == 'junio') {
+                ventaTotal.junio += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasJunio++
+                await ventaTotal.save()
+            } else if (sales.exactMonth == 'julio') {
+                ventaTotal.julio += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasJulio++
+                await ventaTotal.save()
+            } else if (sales.exactMonth == 'agosto') {
+                ventaTotal.agosto += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasAgosto++
+                await ventaTotal.save()
+            } else if (sales.exactMonth == 'septiembre') {
+                ventaTotal.septiembre += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasSeptiembre++
+                await ventaTotal.save()
+            } else if (sales.exactMonth == 'octubre') {
+                ventaTotal.octubre += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasOctubre++
+                await ventaTotal.save()
+            } else if (sales.exactMonth == 'noviembre') {
+                ventaTotal.noviembre += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasNoviembre++
+                await ventaTotal.save()
+            } else if (sales.exactMonth == 'diciembre') {
+                ventaTotal.diciembre += amountApproved
+                ventaTotal.annualAmountApproved += amountApproved
+                ventaTotal.ventasDiciembre++
+                await ventaTotal.save()
+            }
+
+        }
+
+    }
+}
