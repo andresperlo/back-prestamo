@@ -239,7 +239,7 @@ exports.CreateSales = async (req, res) => {
 
     try {
         const usuario = new SellerModel(CreateSalesUser)
-        /*  await usuario.save(); */
+        await usuario.save();
         if (!ventaTotal) {
 
             ventaTotal = new VentasMensualModel({ seller: idGral, year: year })
@@ -650,6 +650,8 @@ exports.getSalesAdmin = async (req, res) => {
                 }
             }, { limit, page, sort: { date: -1 } })
 
+            // const allSales = await SellerModel.find()
+
             res.send(allSales)
         } else if (role == 'seller') {
 
@@ -702,7 +704,6 @@ exports.getSellerAdmin = async (req, res) => {
                 $regex: address
             }
         }, { limit, page })
-
         res.send(seller)
     } catch (err) {
         console.log(err);
@@ -894,15 +895,27 @@ exports.SalesEn = async (req, res) => {
 }
 
 exports.PutSeller = async (req, res) => {
+    
+    let body = req.body
+    const salt = await bcryptjs.genSalt(10);
 
+    const Seller = await AdminModel.findById(body._id);
+
+    const passCompare = body.password === Seller.password
+
+    if (!passCompare) {
+        body.password = await bcryptjs.hash(body.password, salt);
+    }
+    
     try {
 
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
             return res.status(400).json({ mensaje: 'No hay resultado para la Busqueda' });
         }
-
+ 
         const seller = await AdminModel.findByIdAndUpdate(req.params.id, req.body, { new: true })
-            .select('-token -password -__v -roleType -enable')
+        .select('-token -password -__v -roleType -enable')
+
         res.send(seller)
     } catch (err) {
         res.status(500).send(err);
