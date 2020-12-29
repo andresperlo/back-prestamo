@@ -205,32 +205,28 @@ exports.CreateSales = async (req, res) => {
     }
 
     if (userExists) {
-        if (userExists.quantityQuotas > 3) {
-            return res.status(400).json({ mensaje: 'No puede tener el prestamo. Cuota mayor a 3' })
-        } else {
 
-            CreateSalesUser = {
-                fullname,
-                email,
-                creditLine,
-                typeOperation,
-                newClient,
-                nameClient,
-                dniClient,
-                celphoneClient,
-                amountApproved,
-                quotaAmount,
-                quantityQuotas,
-                saleDetail,
-                seller: idGral,
-                date: today,
-                month: month,
-                exactMonth: exactMonth,
-                year: year,
-                tokens: []
-            };
+        CreateSalesUser = {
+            fullname,
+            email,
+            creditLine,
+            typeOperation,
+            newClient,
+            nameClient,
+            dniClient,
+            celphoneClient,
+            amountApproved,
+            quotaAmount,
+            quantityQuotas,
+            saleDetail,
+            seller: idGral,
+            date: today,
+            month: month,
+            exactMonth: exactMonth,
+            year: year,
+            tokens: []
+        };
 
-        }
     }
 
     let ventaTotal = await VentasMensualModel.findOne({ seller: idGral, year: year })
@@ -246,62 +242,62 @@ exports.CreateSales = async (req, res) => {
                 ventaTotal.enero += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasEnero++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'febrero') {
                 ventaTotal.febrero += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasFebrero++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'marzo') {
                 ventaTotal.marzo += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasMarzo++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'abril') {
                 ventaTotal.abril += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasAbril++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'mayo') {
                 ventaTotal.mayo += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasMayo++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'junio') {
                 ventaTotal.junio += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasJunio++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'julio') {
                 ventaTotal.julio += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasJulio++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'agosto') {
                 ventaTotal.agosto += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasAgosto++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'septiembre') {
                 ventaTotal.septiembre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasSeptiembre++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'octubre') {
                 ventaTotal.octubre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasOctubre++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'noviembre') {
                 ventaTotal.noviembre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasNoviembre++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'diciembre') {
                 ventaTotal.diciembre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasDiciembre++
-               await ventaTotal.save()
+                await ventaTotal.save()
             }
         } else {
 
@@ -309,62 +305,62 @@ exports.CreateSales = async (req, res) => {
                 ventaTotal.enero += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasEnero++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'febrero') {
                 ventaTotal.febrero += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasFebrero++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'marzo') {
                 ventaTotal.marzo += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasMarzo++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'abril') {
                 ventaTotal.abril += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasAbril++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'mayo') {
                 ventaTotal.mayo += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasMayo++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'junio') {
                 ventaTotal.junio += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasJunio++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'julio') {
                 ventaTotal.julio += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasJulio++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'agosto') {
                 ventaTotal.agosto += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasAgosto++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'septiembre') {
                 ventaTotal.septiembre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasSeptiembre++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'octubre') {
                 ventaTotal.octubre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasOctubre++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'noviembre') {
                 ventaTotal.noviembre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasNoviembre++
-               await ventaTotal.save()
+                await ventaTotal.save()
             } else if (CreateSalesUser.exactMonth == 'diciembre') {
                 ventaTotal.diciembre += CreateSalesUser.amountApproved
                 ventaTotal.annualAmountApproved += CreateSalesUser.amountApproved
                 ventaTotal.ventasDiciembre++
-               await ventaTotal.save()
+                await ventaTotal.save()
             }
         }
 
@@ -610,6 +606,8 @@ exports.getSalesAdmin = async (req, res) => {
                 },  
             }, { limit: 1700, page, sort: { date: -1 } })
 
+            // const allSales = await SellerModel.find()
+
             res.send(allSales)
         } else if (role == 'seller') {
 
@@ -662,7 +660,18 @@ exports.getSellerAdmin = async (req, res) => {
                 $regex: address
             }
         }, { limit, page })
+        res.send(seller)
+    } catch (err) {
+        console.log(err);
+        res.status(500).send(err);
+    }
+}
 
+exports.getMontoSales = async (req, res) => {
+
+    console.log('monto id ->', req.params);
+    try {
+        const seller = await VentasMensualModel.findById(req.params.id)
         res.send(seller)
     } catch (err) {
         console.log(err);
@@ -843,6 +852,17 @@ exports.SalesEn = async (req, res) => {
 
 exports.PutSeller = async (req, res) => {
 
+    let body = req.body
+    const salt = await bcryptjs.genSalt(10);
+
+    const Seller = await AdminModel.findById(body._id);
+
+    const passCompare = body.password === Seller.password
+
+    if (!passCompare) {
+        body.password = await bcryptjs.hash(body.password, salt);
+    }
+
     try {
 
         if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
@@ -851,6 +871,7 @@ exports.PutSeller = async (req, res) => {
 
         const seller = await AdminModel.findByIdAndUpdate(req.params.id, req.body, { new: true })
             .select('-token -password -__v -roleType -enable')
+
         res.send(seller)
     } catch (err) {
         res.status(500).send(err);
