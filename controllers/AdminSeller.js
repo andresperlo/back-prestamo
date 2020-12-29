@@ -561,9 +561,15 @@ exports.MontoSales = async (req, res) => {
 
 exports.getSalesAdmin = async (req, res) => {
 
-    const { limit, page, date = "", nameClient = "", dniClient = "", celphoneClient = "", fullname = "", creditLine = "", quotaAmount = "", quantityQuotas = "", enable = "", saleDetail = "", amountApproved = "" } = req.query
+   /*  const salesAdmin = await SellerModel.find()
+    console.log('cantidad de ventas -> ',salesAdmin.length)
+    res.send(salesAdmin)
+ */
+   const { limit, page, date = "", nameClient = "", dniClient = "", celphoneClient = "", fullname = "", creditLine = "", quotaAmount = "", quantityQuotas = "", enable = "", saleDetail = "", amountApproved = "" } = req.query
 
     const role = res.locals.user.roleType
+
+
 
     try {
         if (role == 'admin') {
@@ -587,22 +593,22 @@ exports.getSalesAdmin = async (req, res) => {
                 creditLine: {
                     $regex: creditLine
                 },
-                quotaAmount: {
+                 quotaAmount: {
                     $regex: quotaAmount
                 },
                 quantityQuotas: {
                     $regex: quantityQuotas
-                },
-                saleDetail: {
+                }, 
+           /*      saleDetail: {
                     $regex: saleDetail
-                },
+                },   */
                 enable: {
                     $regex: enable
                 },
                 amountApproved: {
                     $regex: amountApproved,
-                }
-            }, { limit, page, sort: { date: -1 } })
+                },  
+            }, { limit: 1700, page, sort: { date: -1 } })
 
             res.send(allSales)
         } else if (role == 'seller') {
