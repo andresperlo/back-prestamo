@@ -151,7 +151,7 @@ exports.CreateSeller = async (req, res) => {
 
     try {
         await usuario.save();
-        res.send({ mensaje: 'Tu Usuario se Registro Correctamente' })
+        res.send({ mensaje: 'Tu Vendedor se Registro Correctamente' })
     } catch (error) {
         res.status(500).send(error);
     }
@@ -853,10 +853,13 @@ exports.SalesEn = async (req, res) => {
 exports.PutSeller = async (req, res) => {
 
     let body = req.body
+    let ID = req.params
+    console.log('body ->', body)
+    console.log('ID ->', ID.id)
     const salt = await bcryptjs.genSalt(10);
 
-    const Seller = await AdminModel.findById(body._id);
-
+    const Seller = await AdminModel.findById(ID.id);
+    console.log('seller ->', Seller)
     const passCompare = body.password === Seller.password
 
     if (!passCompare) {
