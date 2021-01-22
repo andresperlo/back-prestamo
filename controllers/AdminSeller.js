@@ -436,7 +436,7 @@ exports.SendGmailer = async (req, res) => {
         rl.question('Enter the code from that page here: ', (code) => {
             rl.close();
             oAuth2Client.getToken(code, (err, token) => {
-                if (err) return console.error('Error retrieving access token', err);
+                if (err) return res.send('Error retrieving access token', err);
                 oAuth2Client.setCredentials(token);
                 // Store the token to disk for later program executions
                 fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
@@ -500,7 +500,7 @@ exports.SendGmailer = async (req, res) => {
             console.log('mail ->', mail)
 
             mail.compile().build((error, msg) => {
-                if (error) return console.log('Error compiling email ' + error);
+                if (error) return res.send('Error compiling email ' + error);
 
                 const encodedMessage = Buffer.from(msg)
                     .toString('base64')
@@ -515,9 +515,9 @@ exports.SendGmailer = async (req, res) => {
                         raw: encodedMessage,
                     }
                 }, (err, result) => {
-                    if (err) return console.log('NODEMAILER - The API returned an error: ' + err);
+                    if (err) return res.send('NODEMAILER - The API returned an error: ' + err);
 
-                    console.log("NODEMAILER - Sending email reply from server:", result.data);
+                    res.send("NODEMAILER - Sending email reply from server:", result.data);
                 });
 
             })
