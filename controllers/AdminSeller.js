@@ -533,17 +533,15 @@ exports.SendGmailer = async (req, res) => {
                     }
 
                 } catch (error) {
-                    res.send('error ->', error)
+                    res.send({ message: 'error', error })
                 }
 
 
             } else {
-                res.send('No existe Element PDF')
+                res.send({ message: 'No existe Element PDF' })
             }
 
         }
-
-
 
     } catch (error) {
         res.send({ mensaje: 'error' + error })
