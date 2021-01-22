@@ -459,77 +459,94 @@ exports.SendGmailer = async (req, res) => {
             const element = file[index];
             let originalFileName = element.originalFilename
             let pathFile = element.path
-    
+
             console.log('element', element)
             console.log('original file name->', originalFileName)
             console.log('path ->', pathFile)
-    
-            function sendEmail(auth) {
-    
-                // ----------nodemailer test----------------------------------------------------
-    
-                let mail = new MailComposer(
-                    {
-                        to: process.env.EMAIL,
-                        text: "I hope this works",
-                        html: `<h3 style='margin: 0;'>Nombre del Vendedor: ${fullname}</h3></br>
-                               <h3 style='margin: 0;'>Linea de Credito: ${creditLine} </h3> </br>
-                               <h3 style='margin: 0;'>Tipo de Operacion: ${typeOperation} </h3> </br>
-                               <h3 style='margin: 0;'>Nuevo Cliente: ${newClient} </h3> </br>
-                               <h3 style='margin: 0;'>Tipo de Cliente: ${typeClient} </h3> </br>
-                               <h3 style='margin: 0;'>Nombre : ${nameClient} </h3> </br>
-                               <h3 style='margin: 0;'>DNI : ${dniClient} </h3> </br>
-                               <h3 style='margin: 0;'>Celular: ${celphoneClient} </h3> </br>
-                               <h3 style='margin: 0;'>Monto Aprobado: ${amountApproved} </h3> </br>
-                               <h3 style='margin: 0;'>Cantidad de Coutas: ${quantityQuotas} </h3> </br>
-                               <h3 style='margin: 0;'>Monto Por Cuota: ${quotaAmount} </h3> </br>
-                               <h3 style='margin: 0;'>Detalle de la Venta: ${saleDetail} </h3> </br>
-                               <h3 style='margin: 0;'>Fecha: ${date} </h3> </br> 
-                        `,
-                        subject: `${nameClient} | ${fullname}`,
-                        textEncoding: "base64",
-                        attachments: [
-                            {   // encoded string as an attachment
-                                filename: originalFileName,
-                                path: pathFile,
-                                content: 'aGVsbG8gd29ybGQh',
-                                encoding: 'base64'
-                            },
-                        ]
-                    });
-    
-                console.log('mail ->', mail)
-    
-                mail.compile().build((error, msg) => {
-                    if (error) return console.log('Error compiling email ' + error);
-    
-                    const encodedMessage = Buffer.from(msg)
-                        .toString('base64')
-                        .replace(/\+/g, '-')
-                        .replace(/\//g, '_')
-                        .replace(/=+$/, '');
-    
-                    const gmail = google.gmail({ version: 'v1', auth });
-                    gmail.users.messages.send({
-                        userId: 'me',
-                        resource: {
-                            raw: encodedMessage,
+
+            if (element) {
+
+                try {
+
+                    if (originalFileName && pathFile) {
+
+                        function sendEmail(auth) {
+
+                            // ----------nodemailer test----------------------------------------------------
+
+                            let mail = new MailComposer(
+                                {
+                                    to: process.env.EMAIL,
+                                    text: "I hope this works",
+                                    html: `<h3 style='margin: 0;'>Nombre del Vendedor: ${fullname}</h3></br>
+                                       <h3 style='margin: 0;'>Linea de Credito: ${creditLine} </h3> </br>
+                                       <h3 style='margin: 0;'>Tipo de Operacion: ${typeOperation} </h3> </br>
+                                       <h3 style='margin: 0;'>Nuevo Cliente: ${newClient} </h3> </br>
+                                       <h3 style='margin: 0;'>Tipo de Cliente: ${typeClient} </h3> </br>
+                                       <h3 style='margin: 0;'>Nombre : ${nameClient} </h3> </br>
+                                       <h3 style='margin: 0;'>DNI : ${dniClient} </h3> </br>
+                                       <h3 style='margin: 0;'>Celular: ${celphoneClient} </h3> </br>
+                                       <h3 style='margin: 0;'>Monto Aprobado: ${amountApproved} </h3> </br>
+                                       <h3 style='margin: 0;'>Cantidad de Coutas: ${quantityQuotas} </h3> </br>
+                                       <h3 style='margin: 0;'>Monto Por Cuota: ${quotaAmount} </h3> </br>
+                                       <h3 style='margin: 0;'>Detalle de la Venta: ${saleDetail} </h3> </br>
+                                       <h3 style='margin: 0;'>Fecha: ${date} </h3> </br> 
+                                `,
+                                    subject: `${nameClient} | ${fullname}`,
+                                    textEncoding: "base64",
+                                    attachments: [
+                                        {   // encoded string as an attachment
+                                            filename: originalFileName,
+                                            path: pathFile,
+                                            content: 'aGVsbG8gd29ybGQh',
+                                            encoding: 'base64'
+                                        },
+                                    ]
+                                });
+
+                            console.log('mail ->', mail)
+
+                            mail.compile().build((error, msg) => {
+                                if (error) return console.log('Error compiling email ' + error);
+
+                                const encodedMessage = Buffer.from(msg)
+                                    .toString('base64')
+                                    .replace(/\+/g, '-')
+                                    .replace(/\//g, '_')
+                                    .replace(/=+$/, '');
+
+                                const gmail = google.gmail({ version: 'v1', auth });
+                                gmail.users.messages.send({
+                                    userId: 'me',
+                                    resource: {
+                                        raw: encodedMessage,
+                                    }
+                                }, (err, result) => {
+                                    if (err) return console.log('NODEMAILER - The API returned an error: ' + err);
+
+                                    console.log("NODEMAILER - Sending email reply from server:", result.data);
+                                });
+
+                            })
                         }
-                    }, (err, result) => {
-                        if (err) return console.log('NODEMAILER - The API returned an error: ' + err);
-    
-                        console.log("NODEMAILER - Sending email reply from server:", result.data);
-                    });
-    
-                })
+                        res.send({ message: 'se envio mail' })
+                    }
+
+                } catch (error) {
+                    res.send('error ->', error)
+                }
+
+
+            } else {
+                res.send('No existe Element PDF')
             }
-    
+
         }
-        
-        res.send({ message: 'se envio mail' })
+
+
 
     } catch (error) {
-        res.send({mensaje: 'error' + error})
+        res.send({ mensaje: 'error' + error })
     }
 
 }
@@ -562,11 +579,11 @@ exports.MontoSales = async (req, res) => {
 
 exports.getSalesAdmin = async (req, res) => {
 
-   /*  const salesAdmin = await SellerModel.find()
-    console.log('cantidad de ventas -> ',salesAdmin.length)
-    res.send(salesAdmin)
- */
-   const { limit, page, date = "", nameClient = "", dniClient = "", celphoneClient = "", fullname = "", creditLine = "", quotaAmount = "", quantityQuotas = "", enable = "", saleDetail = "", amountApproved = "" } = req.query
+    /*  const salesAdmin = await SellerModel.find()
+     console.log('cantidad de ventas -> ',salesAdmin.length)
+     res.send(salesAdmin)
+  */
+    const { limit, page, date = "", nameClient = "", dniClient = "", celphoneClient = "", fullname = "", creditLine = "", quotaAmount = "", quantityQuotas = "", enable = "", saleDetail = "", amountApproved = "" } = req.query
 
     const role = res.locals.user.roleType
 
@@ -594,21 +611,21 @@ exports.getSalesAdmin = async (req, res) => {
                 creditLine: {
                     $regex: creditLine
                 },
-                 quotaAmount: {
+                quotaAmount: {
                     $regex: quotaAmount
                 },
                 quantityQuotas: {
                     $regex: quantityQuotas
-                }, 
-           /*      saleDetail: {
-                    $regex: saleDetail
-                },   */
+                },
+                /*      saleDetail: {
+                         $regex: saleDetail
+                     },   */
                 enable: {
                     $regex: enable
                 },
                 amountApproved: {
                     $regex: amountApproved,
-                },  
+                },
             }, { limit: 1700, page, sort: { date: -1 } })
 
             // const allSales = await SellerModel.find()
