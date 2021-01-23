@@ -624,7 +624,7 @@ exports.getSalesAdmin = async (req, res) => {
                 amountApproved: {
                     $regex: amountApproved,
                 },
-            }, { limit: 1700, page, sort: { date: -1 } })
+            }, { limit, page, sort: { date: -1 } })
 
             // const allSales = await SellerModel.find()
 
