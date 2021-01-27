@@ -529,7 +529,7 @@ exports.SendGmailer = async (req, res) => {
             res.send({ message: 'se envio mail' + ' path ->', pathFile })
         }
     } catch (error) {
-        res.send('error ->', error, pathFile)
+        res.status(500).send('error ->', error, pathFile)
     }
 }
 
