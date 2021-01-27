@@ -534,7 +534,7 @@ exports.SendGmailer = async (req, res) => {
                     }
 
                 } catch (error) {
-                    res.send({ message: 'error', error, pathFile})
+                    res.send({ message: 'error' + error + pathFile})
                 }
 
 
@@ -545,7 +545,7 @@ exports.SendGmailer = async (req, res) => {
         }
 
     } catch (error) {
-        res.send({ mensaje: 'error', error, pathFile})
+        res.send({ mensaje: 'error' + error + pathFile})
     }
 
 }
