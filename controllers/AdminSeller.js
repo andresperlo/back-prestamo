@@ -450,6 +450,7 @@ exports.SendGmailer = async (req, res) => {
     /*  */
 
     const file = Object.values(req.files)
+    console.log('file ->', file)
     const { fullname, email, creditLine, typeOperation, newClient, typeClient,
         nameClient, dniClient, celphoneClient, amountApproved, quotaAmount,
         quantityQuotas, saleDetail, date } = CreateSalesUser
