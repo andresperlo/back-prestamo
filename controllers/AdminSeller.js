@@ -631,7 +631,7 @@ exports.getSalesAdmin = async (req, res) => {
             res.send(allSales)
         } else if (role == 'seller') {
 
-            const allSales = await SellerModel.find({ seller: res.locals.user.id, enable: 'SI' })
+            const allSales = await SellerModel.find({ seller: res.locals.user.id, enable: 'SI', year })
                 .populate('seller', 'fullname ')
 
             res.send(allSales)
